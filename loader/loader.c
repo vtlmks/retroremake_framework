@@ -75,7 +75,7 @@
 
 #include "loader.h"
 static uint32_t buffer[BUFFER_WIDTH * BUFFER_HEIGHT];
-#include "library_loader.c"
+#include "linux_library_loader.c"
 
 static const char* glsl_version = "#version 140";
 static const float vertices[] = {
@@ -168,7 +168,8 @@ int main(int argc, char **argv) {
 	setbuf(stdout, 0);	// flush immediately to stdout
 #endif
 
-	printf("audio: %d\n", setup_audio());
+	// TODO(peter): Setup a dummy callback that output just zeroes to the buffer...
+	audio_initialize();
 	glfwSetErrorCallback(error_callback);
 
 	if(glfwInit()) {
@@ -281,8 +282,6 @@ int main(int argc, char **argv) {
 			while(running && !glfwWindowShouldClose(window)) {
 				glfwPollEvents();
 
-	printf("%d\n", cal);
-
 				if((glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) ||
 					(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)) {
 					glfwSetWindowShouldClose(window, true);
@@ -350,6 +349,8 @@ uint32_t demo_state = 0;
 	} else {
 		printf("ERROR: Could not initialize glfw!\n");
 	}
+	audio_shutdown();
+
 #ifdef _WIN32
 	timeEndPeriod(1);
 #endif

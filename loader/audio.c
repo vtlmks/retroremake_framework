@@ -26,14 +26,14 @@ void audio_callback(unsigned char *audio_buffer, size_t frames) {
 snd_pcm_t *pcm;
 pthread_t audio_thread;
 
-int8_t buffer[BUFFER_SIZE];
+int8_t alsa_buffer[BUFFER_SIZE];
 
 void *audio_thread_func(void *arg) {
 	// TODO(peter): Add stop check, pthread_cancel, pthread_setcancelstate, pthread_setcanceltype
 	while (1) {
 		snd_pcm_wait(pcm, -1);
-		audio_callback(buffer, BUFFER_SIZE / FRAME_SIZE);
-		snd_pcm_writei(pcm, buffer, BUFFER_SIZE / FRAME_SIZE);
+		audio_callback(alsa_buffer, BUFFER_SIZE / FRAME_SIZE);
+		snd_pcm_writei(pcm, alsa_buffer, BUFFER_SIZE / FRAME_SIZE);
 	}
 
 	return 0;
@@ -62,7 +62,7 @@ static void audio_shutdown() {
 
 HWAVEOUT wave_out;
 WAVEHDR wave_header[BUFFER_COUNT];
-char buffer[BUFFER_COUNT][BUFFER_SIZE];
+char waveout_buffer[BUFFER_COUNT][BUFFER_SIZE];
 
 void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2) {
 	if(uMsg == WOM_DONE) {
@@ -86,7 +86,7 @@ static void audio_initialize() {
 	waveOutOpen(&wave_out, WAVE_MAPPER, &wave_format, (DWORD_PTR)waveOutProc, 0, CALLBACK_FUNCTION);
 
 	for(uint32_t i = 0; i < BUFFER_COUNT; ++i) {
-		wave_header[i].lpData = buffer[i];
+		wave_header[i].lpData = waveout_buffer[i];
 		wave_header[i].dwBufferLength = BUFFER_SIZE;
 		wave_header[i].dwBytesRecorded = 0;
 		wave_header[i].dwUser = 0;
