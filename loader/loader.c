@@ -22,6 +22,8 @@
 
 // “The ships hung in the sky in much the same way that bricks don't.” ― Douglas Adams
 
+//  -  - -- --- ---- -----=<{[ includes ]}>=----- ---- --- -- -  -
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -32,59 +34,41 @@
 #include <math.h>
 #include <inttypes.h>
 
-#include <misc.h>
+// NOTE(peter): This is the default window scale.
+#define SCALE (3)
 
-#define SOGL_MAJOR_VERSION 3
-#define SOGL_MINOR_VERSION 1
-#ifdef _WIN32
-#define SOGL_IMPLEMENTATION_WIN32 /* or SOGL_IMPLEMENTATION_X11 */
-#elif __linux__
-#define SOGL_IMPLEMENTATION_X11 /* or SOGL_IMPLEMENTATION_X11 */
-#endif
+#include "loader.h"
+
+// #include <GL/gl.h>
+#include "glcorearb.h"
 #include "gl3w.h"
 #include "gl3w.c"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-// NOTE(peter): This is the default window scale.
-#define SCALE (3)
 
 #include "audio.c"
-
-#ifdef _WIN32
-	#pragma comment(lib, "winmm.lib")
-	#pragma comment(lib, "ntdll.lib")
-	#include <intrin.h>
-	#include <windows.h>
-	#include <timeapi.h>
-	static void mks_sleep(double time) { Sleep((DWORD)(time*1000)); }
-
-#elif __linux__
-	#include <sys/prctl.h>
-	#include <sys/resource.h>
-	#include <unistd.h>
-	static void mks_sleep(double time) { usleep((int)(time*1000000)); }
-
-#endif
 
 #include "fragment_shader.h"
 #include "vertex_shader.h"
 
 #include "shader.c"
 
-#include "loader.h"
+#include "part.h"
 static uint32_t buffer[BUFFER_WIDTH * BUFFER_HEIGHT];
-#include "linux_library_loader.c"
 
-static const char* glsl_version = "#version 140";
-static const float vertices[] = {
-	 1.f,-1.f, 0.0f, 1.f, 0.f,
-	 1.f, 1.f, 0.0f, 1.f, 1.f,
-	-1.f, 1.f, 0.0f, 0.f, 1.f,
-	-1.f,-1.f, 0.0f, 0.f, 0.f
+#ifdef _WIN32
+#include "win32_library_loader.c"
+#elif __linux__
+#include "linux_library_loader.c"
+#endif
+
+struct retroremake_state {
+	struct part_state *selector_state;
+	struct part_state *remake_state;
+	char *keystate;
 };
-static const uint32_t indices[] = { 0, 1, 3, 1, 2, 3 };
 
 static int window_pos[2];
 static int window_size[2];
@@ -273,7 +257,11 @@ int main(int argc, char **argv) {
 
 			double next_update = glfwGetTime() + FRAME_TIME;
 
-			glfwSetWindowTitle(window, selector.window_title);
+			char tmp[512];
+			snprintf(tmp, sizeof(tmp), "%s - %s", selector.window_title, "Middle Mouse to release mouse - ESC to Exit");
+
+			// glfwSetWindowTitle(window, selector.window_title);
+			glfwSetWindowTitle(window, tmp);
 			selector.buffer = buffer;
 			for(uint32_t i = 0; i < num_remakes; ++i) {
 				remakes[i].buffer = buffer;

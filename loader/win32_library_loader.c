@@ -5,19 +5,19 @@
 #include <windows.h>
 
 // Define necessary structures and types
-struct part_state {
-    char window_title[80];
-    char release_name[80];
-    char lib_path[256];
-    uint32_t *buffer;
-    void *user_data;
-    void (*get_information)(struct part_state *state);
-    void (*setup)(struct part_state *state, struct part_state *remakes, int num_remakes);
-    void (*cleanup)(struct part_state *state);
-    void (*audio_callback)(struct part_state *state);
-    void (*key_callback)(struct part_state *state, int key, int scancode, int action, int mods);
-    int (*mainloop_callback)(struct part_state *state);
-};
+// struct part_state {
+//     char window_title[80];
+//     char release_name[80];
+//     char lib_path[256];
+//     uint32_t *buffer;
+//     void *user_data;
+//     void (*get_information)(struct part_state *state);
+//     void (*setup)(struct part_state *state, struct part_state *remakes, int num_remakes);
+//     void (*cleanup)(struct part_state *state);
+//     void (*audio_callback)(struct part_state *state);
+//     void (*key_callback)(struct part_state *state, int key, int scancode, int action, int mods);
+//     int (*mainloop_callback)(struct part_state *state);
+// };
 
 struct part_state selector;    // Active selector
 struct part_state remake;    // Active remake
@@ -26,20 +26,20 @@ HMODULE remake_handle;    // Handle to loaded remake
 uint32_t num_remakes;    // Number of remakes
 
 // Function prototypes
-void load_remakes();
-void load_selector();
-void load_remake(uint32_t index);
-void close_remake();
+// void load_remakes();
+// void load_selector();
+// void load_remake(uint32_t index);
+// void close_remake();
 
-int main() {
-    load_remakes();
-    load_selector();
+// int main() {
+//     load_remakes();
+//     load_selector();
 
-    // Uncomment the following line to load a specific remake
-    // load_remake(index - 1);
+//     // Uncomment the following line to load a specific remake
+//     // load_remake(index - 1);
 
-    return 0;
-}
+//     return 0;
+// }
 
 void load_remakes() {
 	WIN32_FIND_DATA find_data;
@@ -104,8 +104,8 @@ void load_selector() {
 	}
 
 	// Randomly pick one of the files
-	if (num_files > 0) {P
-		srand(GetTickCount());
+	if (num_files > 0) {
+		srand(time(0));
 		int selected_index = rand() % num_files;
 
 		// Find the selected file
@@ -130,9 +130,9 @@ void load_selector() {
 		HMODULE handle = LoadLibrary(path);
 		if (handle != NULL) {
 			// Get pointers to functions in the struct and store them in the global 'selector' struct
-			selector.setup = (void (*)(struct part_state *, struct part_state *, int))GetProcAddress(handle, "setup");
+			selector.setup = (void (*)(struct part_state *, struct part_state *, uint32_t))GetProcAddress(handle, "setup");
 			selector.cleanup = (void (*)(struct part_state *))GetProcAddress(handle, "cleanup");
-			selector.audio_callback = (void (*)(struct part_state *))GetProcAddress(handle, "audio_callback");
+			selector.audio_callback = (void (*)(struct part_state *, int16_t *, size_t))GetProcAddress(handle, "audio_callback");
 			selector.key_callback = (void (*)(struct part_state *, int, int, int, int))GetProcAddress(handle, "key_callback");
 			selector.mainloop_callback = (int (*)(struct part_state *))GetProcAddress(handle, "mainloop_callback");
 
@@ -161,7 +161,7 @@ void load_remake(uint32_t index) {
 	// remake.get_information = (void (*)(struct part_state *))GetProcAddress(remake_handle, "get_information");
 	remake.setup = (void (*)(struct part_state *, struct part_state *, uint32_t))GetProcAddress(handle, "setup");
 	remake.cleanup = (void (*)(struct part_state *))GetProcAddress(handle, "cleanup");
-	remake.audio_callback = (void (*)(struct part_state *))GetProcAddress(handle, "audio_callback");
+	remake.audio_callback = (void (*)(struct part_state *, int16_t *, size_t))GetProcAddress(handle, "audio_callback");
 	remake.key_callback = (void (*)(struct part_state *, int, int, int, int))GetProcAddress(handle, "key_callback");
 	remake.mainloop_callback = (int (*)(struct part_state *))GetProcAddress(handle, "mainloop_callback");
 	if (remake.setup == NULL || remake.cleanup == NULL || remake.audio_callback == NULL || remake.key_callback == NULL || remake.mainloop_callback == NULL) {
@@ -177,3 +177,8 @@ void close_remake() {
 		remake_handle = NULL;
 	}
 }
+
+
+
+
+

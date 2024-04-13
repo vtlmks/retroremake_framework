@@ -167,7 +167,7 @@ void load_remake(uint32_t index) {
 	// remake.get_information = (void (*)(struct part_state *))dlsym(remake_handle, "get_information");
 	remake.setup = (void (*)(struct part_state *, struct part_state *, uint32_t))dlsym(remake_handle, "setup");
 	remake.cleanup = (void (*)(struct part_state *))dlsym(remake_handle, "cleanup");
-	remake.audio_callback = (void (*)(struct part_state *))dlsym(remake_handle, "audio_callback");
+	remake.audio_callback = (void (*)(struct part_state *, int16_t *, size_t))dlsym(remake_handle, "audio_callback");
 	remake.key_callback = (void (*)(struct part_state *, int, int, int, int))dlsym(remake_handle, "key_callback");
 	remake.mainloop_callback = (int (*)(struct part_state *))dlsym(remake_handle, "mainloop_callback");
 	if(dlerror() != NULL) {

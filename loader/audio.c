@@ -7,14 +7,13 @@
 #define NUM_CHANNELS 2
 #define FRAME_SIZE (NUM_CHANNELS * sizeof(short))
 
-void audio_callback(unsigned char *audio_buffer, size_t frames) {
-	int16_t *b = (int16_t*)audio_buffer;
+void audio_callback(int16_t *audio_buffer, size_t frames) {
 	// TODO(peter): This should call the selector/remake audio_callback() function...
 	//              I have to decide if it should be called with just buffer + frames
 	//              of if I should have some kind of user_data field, or if I should
 	//              send a pointer to the part_state structure...  have to decide soon...
 
-	// pt2play_FillAudioBuffer(&ptstate, b, frames);
+	// pt2play_FillAudioBuffer(&ptstate, audio_buffer, frames);
 }
 
 #ifdef __linux__
@@ -26,14 +25,14 @@ void audio_callback(unsigned char *audio_buffer, size_t frames) {
 snd_pcm_t *pcm;
 pthread_t audio_thread;
 
-int8_t alsa_buffer[BUFFER_SIZE];
+uint16_t alsa_buffer[BUFFER_SIZE];
 
 void *audio_thread_func(void *arg) {
-	// TODO(peter): Add stop check, pthread_cancel, pthread_setcancelstate, pthread_setcanceltype
 	while (1) {
 		snd_pcm_wait(pcm, -1);
 		audio_callback(alsa_buffer, BUFFER_SIZE / FRAME_SIZE);
 		snd_pcm_writei(pcm, alsa_buffer, BUFFER_SIZE / FRAME_SIZE);
+		pthread_testcancel();
 	}
 
 	return 0;
@@ -47,8 +46,9 @@ static void audio_initialize() {
 }
 
 static void audio_shutdown() {
-	// TODO(peter): Wait for the audio thread to finish
-	//              pthread_join(audio_thread, NULL);
+	pthread_cancel(audio_thread);
+	pthread_join(audio_thread, 0);
+	snd_pcm_drop(pcm);
 	snd_pcm_close(pcm);
 }
 
@@ -62,13 +62,13 @@ static void audio_shutdown() {
 
 HWAVEOUT wave_out;
 WAVEHDR wave_header[BUFFER_COUNT];
-char waveout_buffer[BUFFER_COUNT][BUFFER_SIZE];
+int8_t waveout_buffer[BUFFER_COUNT][BUFFER_SIZE];
 
 void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2) {
 	if(uMsg == WOM_DONE) {
 		WAVEHDR *wave_header = (WAVEHDR*)dwParam1;
 		waveOutUnprepareHeader(hwo, wave_header, sizeof(WAVEHDR));
-		audio_callback(wave_header->lpData, wave_header->dwBufferLength / FRAME_SIZE);
+		audio_callback((int16_t*)wave_header->lpData, wave_header->dwBufferLength / FRAME_SIZE);
 		waveOutPrepareHeader(hwo, wave_header, sizeof(WAVEHDR));
 		waveOutWrite(hwo, wave_header, sizeof(WAVEHDR));
 	}
@@ -98,16 +98,16 @@ static void audio_initialize() {
 	}
 
 	for(uint32_t i = 0; i < BUFFER_COUNT; ++i) {
-		audio_callback(wave_header[i].lpData, BUFFER_SIZE/FRAME_SIZE);
+		audio_callback((int16_t*)wave_header[i].lpData, BUFFER_SIZE/FRAME_SIZE);
 		waveOutWrite(wave_out, &wave_header[i], sizeof(WAVEHDR));
 	}
 }
 
 static void audio_shutdown() {
+	waveOutReset(wave_out);
 	for(uint32_t i = 0; i < BUFFER_COUNT; ++i) {
 		waveOutUnprepareHeader(wave_out, &wave_header[i], sizeof(WAVEHDR));
 	}
-	waveOutReset(wave_out);
 	waveOutClose(wave_out);
 }
 

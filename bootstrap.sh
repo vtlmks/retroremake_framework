@@ -18,6 +18,7 @@ touch .retroremakes_root
 # The main program to view remakes of old Amiga/Atari/C64 demos/intros/cracktros and similar creations
 # is the loader/loader.exe located in the {root}/bin directory.
 mkdir -p bin/remakes
+mkdir -p include
 
 # Function to build GLFW for Linux
 build_linux() {
