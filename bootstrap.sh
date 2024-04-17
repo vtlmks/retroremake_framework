@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ ! -f "glfw/.git" ]; then
+    echo "ERROR: Submodule 'glfw' not properly initialized. Please run 'git submodule update --init --recursive' before running this script."
+    exit 1
+fi
+
 # The main program to view remakes of old Amiga/Atari/C64 demos/intros/cracktros and similar creations
 # is the loader/loader.exe located in the {root}/bin directory.
 #
