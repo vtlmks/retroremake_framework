@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <loader.h>
+#include <part.h>
 
 EXPORT void get_information(struct part_state *state) {
 	strcpy(state->window_title, "This is the window title...");

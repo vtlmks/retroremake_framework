@@ -34,12 +34,6 @@
 #include <math.h>
 #include <inttypes.h>
 
-// NOTE(peter): This is the default window scale.
-#define SCALE (3)
-
-#include "loader.h"
-
-// #include <GL/gl.h>
 #include "glcorearb.h"
 #include "gl3w.h"
 #include "gl3w.c"
@@ -48,15 +42,25 @@
 #include <GLFW/glfw3.h>
 
 
-#include "audio.c"
+#define SCALE (3)
+
+#include "misc.h"
+
 
 #include "fragment_shader.h"
 #include "vertex_shader.h"
 
+
+#include "audio.c"
 #include "shader.c"
 
-#include "part.h"
-static uint32_t buffer[BUFFER_WIDTH * BUFFER_HEIGHT];
+#include "loader.h"
+#include "remake.h"
+#include "selector.h"
+
+#include "loader_internal.h"
+
+// static uint32_t buffer[BUFFER_WIDTH * BUFFER_HEIGHT];
 
 #ifdef _WIN32
 #include "win32_library_loader.c"
@@ -64,23 +68,20 @@ static uint32_t buffer[BUFFER_WIDTH * BUFFER_HEIGHT];
 #include "linux_library_loader.c"
 #endif
 
-struct retroremake_state {
-	struct part_state *selector_state;
-	struct part_state *remake_state;
-	char *keystate;
-};
 
-static int window_pos[2];
-static int window_size[2];
-static uint32_t toggle_crt_emulation = true;
-
+// [=]===^=====================================================================================^===[=]
+// NOTE(peter): We can steal F11 and F12 here, and the shift, ctrl, alt, version of them, they are not on the Amiga keyboard.
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-	if(key == GLFW_KEY_C && action == GLFW_PRESS) {
-		toggle_crt_emulation = !toggle_crt_emulation;
+	static int window_pos[2];
+	static int window_size[2];
+
+	struct loader_state *state = glfwGetWindowUserPointer(window);
+
+	if(key == GLFW_KEY_F11 && action == GLFW_PRESS) {
+		state->toggle_crt_emulation = !state->toggle_crt_emulation;
 	}
 
-	if(glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS &&
-		glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+	if(glfwGetKey(window, GLFW_KEY_F12) == GLFW_PRESS) {
 		if(glfwGetWindowMonitor(window) == 0) {
 
 			glfwGetWindowPos(window, &window_pos[0], &window_pos[1]);
@@ -95,33 +96,33 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 		}
 	}
 
-	// struct base_state *state = glfwGetWindowUserPointer(window);
 	// if(key_callback) {
 	// 	key_callback(state, key, scancode, action, mods);
 	// }
 }
 
+// [=]===^=====================================================================================^===[=]
 static void error_callback(int e, const char *d) {
 	printf("Error %d: %s\n", e, d);
 }
 
-struct viewport { float x, y, w, h; };
-static struct viewport remake_viewport;
+// [=]===^=====================================================================================^===[=]
 
 static void framebuffer_callback(GLFWwindow *window, int width, int height) {
+	struct loader_state *state = glfwGetWindowUserPointer(window);
 
 	const float wanted_aspect = 4.f/3.f;
 	float current_aspect = (float)width/(float)height;
 
-	remake_viewport.x = 0.0f;
-	remake_viewport.y = 0.0f;
-	remake_viewport.w = width;
-	remake_viewport.h = height;
+	state->viewport.x = 0.0f;
+	state->viewport.y = 0.0f;
+	state->viewport.w = width;
+	state->viewport.h = height;
 
 	if(current_aspect > wanted_aspect) {		// NOTE(peter): If we are fullscreen
 		float new_width = width * (wanted_aspect / current_aspect);
-		remake_viewport.x = (width - new_width) / 2;
-		remake_viewport.w = new_width;
+		state->viewport.x = (width - new_width) / 2;
+		state->viewport.w = new_width;
 	}
 }
 
@@ -142,8 +143,10 @@ int main(int argc, char **argv) {
 	bool running;
 	GLFWwindow *window;
 
-	load_remakes();
-	load_selector();
+	struct loader_state state;
+
+	load_remakes(&state);
+	load_selector(&state);
 
 #ifdef _WIN32
 	timeBeginPeriod(1);
@@ -176,13 +179,15 @@ int main(int argc, char **argv) {
 			glfwSetFramebufferSizeCallback(window, framebuffer_callback);
 			glfwSetWindowAspectRatio(window, 4, 3);
 			glfwSetWindowSizeLimits(window, min_window_width, min_window_height, -1, -1);
-			// glfwSetWindowUserPointer(window, state);
+			glfwSetWindowUserPointer(window, &state);
 			glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);		// NOTE(peter): Sticky mouse buttons, so we don't miss any events..
 
-			remake_viewport.x = 0;
-			remake_viewport.y = 0;
-			remake_viewport.w	= scaled_window_width;
-			remake_viewport.h = scaled_window_height;
+			state.shared.buffer = malloc(BUFFER_WIDTH * BUFFER_HEIGHT);
+
+			state.viewport.x = 0;
+			state.viewport.y = 0;
+			state.viewport.w	= scaled_window_width;
+			state.viewport.h = scaled_window_height;
 
 			// Setup Shader
 			GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -241,7 +246,7 @@ int main(int argc, char **argv) {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, BUFFER_WIDTH, BUFFER_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, buffer);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, BUFFER_WIDTH, BUFFER_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state.shared.buffer);
 
 			running = true;
 
@@ -258,14 +263,10 @@ int main(int argc, char **argv) {
 			double next_update = glfwGetTime() + FRAME_TIME;
 
 			char tmp[512];
-			snprintf(tmp, sizeof(tmp), "%s - %s", selector.window_title, "Middle Mouse to release mouse - ESC to Exit");
+			snprintf(tmp, sizeof(tmp), "%s - %s", state.selector.window_title, "Middle Mouse to release mouse - ESC to Exit");
 
 			// glfwSetWindowTitle(window, selector.window_title);
 			glfwSetWindowTitle(window, tmp);
-			selector.buffer = buffer;
-			for(uint32_t i = 0; i < num_remakes; ++i) {
-				remakes[i].buffer = buffer;
-			}
 
 			while(running && !glfwWindowShouldClose(window)) {
 				glfwPollEvents();
@@ -279,7 +280,7 @@ uint32_t demo_state = 0;
 
 				switch(demo_state) {
 					case 0: {
-						selector.mainloop_callback(&selector);
+						state.selector.mainloop_callback(&state.shared);
 					} break;
 					case 1: {
 						// demo_mainloop();
@@ -287,21 +288,21 @@ uint32_t demo_state = 0;
 				}
 
 				// NOTE(peter): Rendering stuff
-				glViewport(remake_viewport.x, remake_viewport.y, remake_viewport.w, remake_viewport.h);
+				glViewport(state.viewport.x, state.viewport.y, state.viewport.w, state.viewport.h);
 				glClearColor(0.f, 0.f, 0.f, 0.f);
 				glClear(GL_COLOR_BUFFER_BIT);
 				// These values are set once, move inside the mainloop if you want to vary any one of them.
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, texture);
-				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, BUFFER_WIDTH, BUFFER_HEIGHT, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, buffer);
+				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, BUFFER_WIDTH, BUFFER_HEIGHT, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state.shared.buffer);
 
 				glUseProgram(shader_program);
 				glUniform2f(uniform_src_image_size, (float)BUFFER_WIDTH, (float)BUFFER_HEIGHT);
-				glUniform2f(uniform_resolution, remake_viewport.w, remake_viewport.h);
+				glUniform2f(uniform_resolution, state.viewport.w, state.viewport.h);
 				glUniform1f(uniform_brightness, brightness);
 				glUniform1f(uniform_contrast, contrast);
 				glUniform4f(uniform_tone, tone_dat[0], tone_dat[1], tone_dat[2], tone_dat[3]);
-				glUniform1i(uniform_crt_emulation, toggle_crt_emulation);
+				glUniform1i(uniform_crt_emulation, state.toggle_crt_emulation);
 				glBindVertexArray(vao);
 				glBindBuffer(GL_ARRAY_BUFFER, vbo);
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);

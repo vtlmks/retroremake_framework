@@ -1,37 +1,176 @@
-#define ARRAY_SIZE(_Array) (sizeof(_Array) / sizeof(_Array[0]))
+#pragma once
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-
-#if defined(__GNUC__) || defined(__clang__) || defined(__TINYC__)
-#define ALIGNED(x) __attribute__((aligned(x)))
-#elif defined(_MSC_VER)
-#define ALIGNED(x) __declspec(align(x))
-#endif
-
-static float lerp(float v0, float v1, float t) {
-	return (1.f - t) * v0 + t * v1;
-}
+// IMPORTANT(peter): DO NOT CHANGE THESE!!!
+//                   There is nothing that checks these values, they are for optimization/convenience only
+#define BUFFER_WIDTH (368)
+#define BUFFER_HEIGHT (276)
+#define FRAMES_PER_SECOND 50.0
+#define FRAME_TIME (1.0/FRAMES_PER_SECOND);
 
 #ifdef _WIN32
-	#include <intrin.h>
-	#include <windows.h>
-	#include <timeapi.h>
-	static void mks_sleep(double time) { Sleep((DWORD)(time*1000)); }
-
-#elif __linux__
-	#include <sys/prctl.h>
-	#include <sys/resource.h>
-	#include <unistd.h>
-	static void mks_sleep(double time) { usleep((int)(time*1000000)); }
-
+#define EXPORT __declspec(dllexport)
+#else
+#define EXPORT
 #endif
 
-static const char* glsl_version = "#version 140";
-static const float vertices[] = {
-	 1.f,-1.f, 0.0f, 1.f, 0.f,
-	 1.f, 1.f, 0.0f, 1.f, 1.f,
-	-1.f, 1.f, 0.0f, 0.f, 1.f,
-	-1.f,-1.f, 0.0f, 0.f, 0.f
+
+// TODO :  setup a keystate[] where we store what keys are held down for the frame.
+//         make a char key;  that is zero if no key is pressed, else contain the current
+//         pressed key, or last key pressed on the keyboard if multiple keys are pressed
+//         simultaneous, to be able to have hidden parts accessible with a string,
+
+//         the deltamouse stuff + a byte or somesuch with information about buttonstate of mouse
+//         should do something to fetch joypad, to emulate mouse.
+//         we also need to emulate joy on keyboard for people who has no joystick and want to enter
+//         hiddenpart via joystick firebutton
+
+
+
+// TODO(peter): Add more callbacks, mousemove and mousebuttons
+// perhaps instead of having callbacks for mousemove and mousebuttons I add a pointer to a datastructure where I publish data like
+// delta mouse and other information. For delta mouse you need to save the previous value and subtract from the newly read value
+// to get the delta since last read. I might do the same for mousebuttons. The mousebutton bits are set till they are released.
+// This will mean that it's possible to miss mouseclicks that are below 20ms long (1/50th frame).
+
+// Instead of using callbacks for mouse movement and mouse buttons, we could consider adding a pointer to a data structure where
+// we publish information such as delta mouse movements and other relevant data.
+// For calculating delta mouse movements, we'll need to store the previous mouse position and subtract it from the newly read position to get the change since the last read.
+// Similarly, we might apply the same approach for tracking mouse button states. The mouse button bits remain set until they are released.
+// However, it's worth noting that with this approach, there's a possibility of missing mouse clicks that are shorter than 20 milliseconds (1/50th of a frame).
+
+/*
+ * -=[*]=- part_state struct documentation
+ *
+ */
+
+struct loader_shared_state {
+	uint32_t *buffer;						// This is the screen, [BUFFER_WIDTH * BUFFER_HEIGHT] in size, RGBA format.
+	char keyboard_state[512];			// You can check in this array what keys are pressed, they are defined below!
+	int32_t mouse_delta_x;
+	int32_t mouse_delta_y;
+	bool grab_cursor;
 };
-static const uint32_t indices[] = { 0, 1, 3, 1, 2, 3 };
+
+#define AMIGA_KEY_SPACE              32
+#define AMIGA_KEY_APOSTROPHE         39  /* ' */
+#define AMIGA_KEY_COMMA              44  /* , */
+#define AMIGA_KEY_MINUS              45  /* - */
+#define AMIGA_KEY_PERIOD             46  /* . */
+#define AMIGA_KEY_SLASH              47  /* / */
+#define AMIGA_KEY_0                  48
+#define AMIGA_KEY_1                  49
+#define AMIGA_KEY_2                  50
+#define AMIGA_KEY_3                  51
+#define AMIGA_KEY_4                  52
+#define AMIGA_KEY_5                  53
+#define AMIGA_KEY_6                  54
+#define AMIGA_KEY_7                  55
+#define AMIGA_KEY_8                  56
+#define AMIGA_KEY_9                  57
+#define AMIGA_KEY_SEMICOLON          59  /* ; */
+#define AMIGA_KEY_EQUAL              61  /* = */
+#define AMIGA_KEY_A                  65
+#define AMIGA_KEY_B                  66
+#define AMIGA_KEY_C                  67
+#define AMIGA_KEY_D                  68
+#define AMIGA_KEY_E                  69
+#define AMIGA_KEY_F                  70
+#define AMIGA_KEY_G                  71
+#define AMIGA_KEY_H                  72
+#define AMIGA_KEY_I                  73
+#define AMIGA_KEY_J                  74
+#define AMIGA_KEY_K                  75
+#define AMIGA_KEY_L                  76
+#define AMIGA_KEY_M                  77
+#define AMIGA_KEY_N                  78
+#define AMIGA_KEY_O                  79
+#define AMIGA_KEY_P                  80
+#define AMIGA_KEY_Q                  81
+#define AMIGA_KEY_R                  82
+#define AMIGA_KEY_S                  83
+#define AMIGA_KEY_T                  84
+#define AMIGA_KEY_U                  85
+#define AMIGA_KEY_V                  86
+#define AMIGA_KEY_W                  87
+#define AMIGA_KEY_X                  88
+#define AMIGA_KEY_Y                  89
+#define AMIGA_KEY_Z                  90
+#define AMIGA_KEY_LEFT_BRACKET       91  /* [ */
+#define AMIGA_KEY_BACKSLASH          92  /* \ */
+#define AMIGA_KEY_RIGHT_BRACKET      93  /* ] */
+#define AMIGA_KEY_GRAVE_ACCENT       96  /* ` */
+#define AMIGA_KEY_WORLD_1            161 /* non-US #1 */
+#define AMIGA_KEY_WORLD_2            162 /* non-US #2 */
+
+/* Function keys */
+#define AMIGA_KEY_ESCAPE             256
+#define AMIGA_KEY_ENTER              257
+#define AMIGA_KEY_TAB                258
+#define AMIGA_KEY_BACKSPACE          259
+#define AMIGA_KEY_INSERT             260
+#define AMIGA_KEY_DELETE             261
+#define AMIGA_KEY_RIGHT              262
+#define AMIGA_KEY_LEFT               263
+#define AMIGA_KEY_DOWN               264
+#define AMIGA_KEY_UP                 265
+#define AMIGA_KEY_PAGE_UP            266
+#define AMIGA_KEY_PAGE_DOWN          267
+#define AMIGA_KEY_HOME               268
+#define AMIGA_KEY_END                269
+#define AMIGA_KEY_CAPS_LOCK          280
+#define AMIGA_KEY_SCROLL_LOCK        281
+#define AMIGA_KEY_NUM_LOCK           282
+#define AMIGA_KEY_PRINT_SCREEN       283
+#define AMIGA_KEY_PAUSE              284
+#define AMIGA_KEY_F1                 290
+#define AMIGA_KEY_F2                 291
+#define AMIGA_KEY_F3                 292
+#define AMIGA_KEY_F4                 293
+#define AMIGA_KEY_F5                 294
+#define AMIGA_KEY_F6                 295
+#define AMIGA_KEY_F7                 296
+#define AMIGA_KEY_F8                 297
+#define AMIGA_KEY_F9                 298
+#define AMIGA_KEY_F10                299
+#define AMIGA_KEY_F11                300
+#define AMIGA_KEY_F12                301
+#define AMIGA_KEY_F13                302
+#define AMIGA_KEY_F14                303
+#define AMIGA_KEY_F15                304
+#define AMIGA_KEY_F16                305
+#define AMIGA_KEY_F17                306
+#define AMIGA_KEY_F18                307
+#define AMIGA_KEY_F19                308
+#define AMIGA_KEY_F20                309
+#define AMIGA_KEY_F21                310
+#define AMIGA_KEY_F22                311
+#define AMIGA_KEY_F23                312
+#define AMIGA_KEY_F24                313
+#define AMIGA_KEY_F25                314
+#define AMIGA_KEY_KP_0               320
+#define AMIGA_KEY_KP_1               321
+#define AMIGA_KEY_KP_2               322
+#define AMIGA_KEY_KP_3               323
+#define AMIGA_KEY_KP_4               324
+#define AMIGA_KEY_KP_5               325
+#define AMIGA_KEY_KP_6               326
+#define AMIGA_KEY_KP_7               327
+#define AMIGA_KEY_KP_8               328
+#define AMIGA_KEY_KP_9               329
+#define AMIGA_KEY_KP_DECIMAL         330
+#define AMIGA_KEY_KP_DIVIDE          331
+#define AMIGA_KEY_KP_MULTIPLY        332
+#define AMIGA_KEY_KP_SUBTRACT        333
+#define AMIGA_KEY_KP_ADD             334
+#define AMIGA_KEY_KP_ENTER           335
+#define AMIGA_KEY_KP_EQUAL           336
+#define AMIGA_KEY_LEFT_SHIFT         340
+#define AMIGA_KEY_LEFT_CONTROL       341
+#define AMIGA_KEY_LEFT_ALT           342
+#define AMIGA_KEY_LEFT_SUPER         343
+#define AMIGA_KEY_RIGHT_SHIFT        344
+#define AMIGA_KEY_RIGHT_CONTROL      345
+#define AMIGA_KEY_RIGHT_ALT          346
+#define AMIGA_KEY_RIGHT_SUPER        347
+#define AMIGA_KEY_MENU               348
+

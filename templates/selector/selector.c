@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <loader.h>
+#include <part.h>
 
 EXPORT void setup(struct part_state *state, void *, void *) {	// the last two arguments we don't care about as a remake.
 	strcpy(state->window_title, "First selector - (c)2024 ViTAL - Mindkiller Systems.");
