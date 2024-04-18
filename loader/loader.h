@@ -45,6 +45,7 @@
 
 struct loader_shared_state {
 	uint32_t *buffer;						// This is the screen, [BUFFER_WIDTH * BUFFER_HEIGHT] in size, RGBA format.
+	void *userdata;						// This can be filled in with a pointer to a struct containing data for the selector/remake.
 	char keyboard_state[512];			// You can check in this array what keys are pressed, they are defined below!
 	int32_t mouse_delta_x;
 	int32_t mouse_delta_y;

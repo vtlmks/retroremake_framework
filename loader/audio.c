@@ -7,13 +7,20 @@
 #define NUM_CHANNELS 2
 #define FRAME_SIZE (NUM_CHANNELS * sizeof(short))
 
-void audio_callback(int16_t *audio_buffer, size_t frames) {
-	// TODO(peter): This should call the selector/remake audio_callback() function...
-	//              I have to decide if it should be called with just buffer + frames
-	//              of if I should have some kind of user_data field, or if I should
-	//              send a pointer to the part_state structure...  have to decide soon...
-
-	// pt2play_FillAudioBuffer(&ptstate, audio_buffer, frames);
+void audio_callback(void *userdata, int16_t *audio_buffer, size_t frames) {
+	struct loader_state *state = userdata;
+	switch(state->mode) {
+		case REMAKE_MODE: {
+			if(state->remake.audio_callback) {
+				state->remake.audio_callback(&state->shared, audio_buffer, frames);
+			}
+		} break;
+		case SELECTOR_MODE: {
+			if(state->selector.audio_callback) {
+				state->selector.audio_callback(&state->shared, audio_buffer, frames);
+			}
+		} break;
+	}
 }
 
 #ifdef __linux__
@@ -30,7 +37,7 @@ uint16_t alsa_buffer[BUFFER_SIZE];
 void *audio_thread_func(void *arg) {
 	while (1) {
 		snd_pcm_wait(pcm, -1);
-		audio_callback(alsa_buffer, BUFFER_SIZE / FRAME_SIZE);
+		audio_callback(arg, alsa_buffer, BUFFER_SIZE / FRAME_SIZE);
 		snd_pcm_writei(pcm, alsa_buffer, BUFFER_SIZE / FRAME_SIZE);
 		pthread_testcancel();
 	}
@@ -38,11 +45,11 @@ void *audio_thread_func(void *arg) {
 	return 0;
 }
 
-static void audio_initialize() {
+static void audio_initialize(struct loader_state *state) {
 	snd_pcm_open(&pcm, "default", SND_PCM_STREAM_PLAYBACK, 0);
 	snd_pcm_set_params(pcm, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, NUM_CHANNELS, SAMPLE_RATE, 1, 100000);
 	snd_pcm_start(pcm);
-	pthread_create(&audio_thread, 0, audio_thread_func, 0);
+	pthread_create(&audio_thread, 0, audio_thread_func, state);
 }
 
 static void audio_shutdown() {
@@ -66,15 +73,30 @@ int8_t waveout_buffer[BUFFER_COUNT][BUFFER_SIZE];
 
 void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2) {
 	if(uMsg == WOM_DONE) {
+		struct loader_state *state = (struct loader_state *)dwInstance;
+
 		WAVEHDR *wave_header = (WAVEHDR*)dwParam1;
 		waveOutUnprepareHeader(hwo, wave_header, sizeof(WAVEHDR));
-		audio_callback((int16_t*)wave_header->lpData, wave_header->dwBufferLength / FRAME_SIZE);
+
+		switch(state->mode) {
+			case REMAKE_MODE: {
+				if(state->remake.audio_callback) {
+					state->remake.audio_callback(&state->shared, (int16_t*)wave_header->lpData, wave_header->dwBufferLength / FRAME_SIZE);
+				}
+			} break;
+			case SELECTOR_MODE: {
+				if(state->selector.audio_callback) {
+					state->selector.audio_callback(&state->shared, (int16_t*)wave_header->lpData, wave_header->dwBufferLength / FRAME_SIZE);
+				}
+			} break;
+		}
+		// audio_callback((int16_t*)wave_header->lpData, wave_header->dwBufferLength / FRAME_SIZE);
 		waveOutPrepareHeader(hwo, wave_header, sizeof(WAVEHDR));
 		waveOutWrite(hwo, wave_header, sizeof(WAVEHDR));
 	}
 }
 
-static void audio_initialize() {
+static void audio_initialize(struct loader_state *state) {
 	WAVEFORMATEX wave_format;
 	wave_format.wFormatTag = WAVE_FORMAT_PCM;
 	wave_format.nChannels = NUM_CHANNELS;
@@ -83,7 +105,7 @@ static void audio_initialize() {
 	wave_format.nBlockAlign = wave_format.nChannels * (wave_format.wBitsPerSample / 8);
 	wave_format.nAvgBytesPerSec = wave_format.nSamplesPerSec * wave_format.nBlockAlign;
 	wave_format.cbSize = 0;
-	waveOutOpen(&wave_out, WAVE_MAPPER, &wave_format, (DWORD_PTR)waveOutProc, 0, CALLBACK_FUNCTION);
+	waveOutOpen(&wave_out, WAVE_MAPPER, &wave_format, (DWORD_PTR)waveOutProc, (DWORD_PTR)state, CALLBACK_FUNCTION);
 
 	for(uint32_t i = 0; i < BUFFER_COUNT; ++i) {
 		wave_header[i].lpData = waveout_buffer[i];
@@ -98,7 +120,8 @@ static void audio_initialize() {
 	}
 
 	for(uint32_t i = 0; i < BUFFER_COUNT; ++i) {
-		audio_callback((int16_t*)wave_header[i].lpData, BUFFER_SIZE/FRAME_SIZE);
+		memset(wave_header[i].lpData, 0, BUFFER_SIZE);
+		// audio_callback((int16_t*)wave_header[i].lpData, BUFFER_SIZE/FRAME_SIZE);
 		waveOutWrite(wave_out, &wave_header[i], sizeof(WAVEHDR));
 	}
 }

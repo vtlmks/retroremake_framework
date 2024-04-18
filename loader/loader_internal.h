@@ -24,8 +24,13 @@ static const uint32_t indices[] = { 0, 1, 3, 1, 2, 3 };
 
 struct viewport { float x, y, w, h; };
 
+enum program_mode {
+	SELECTOR_MODE,
+	REMAKE_MODE
+};
+
 /*
- * -=[*]=- loader struct documentation
+ * -=[*]=- loader_state struct documentation
  *
  */
 struct loader_state {
@@ -36,8 +41,10 @@ struct loader_state {
 	bool toggle_crt_emulation;				// Toggle for the shader CRT emulation.
 	struct loader_shared_state shared;	//
 	struct viewport viewport;
+	enum program_mode mode;
 
 #ifdef _WIN32
+	HMODULE remake_handle;					// Handle to loaded remake
 #elif defined(__linux__)
 	void *remake_handle;						// handle holding the descriptor returned from dlopen
 #endif

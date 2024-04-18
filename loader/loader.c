@@ -41,18 +41,13 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-
+// Default scale
 #define SCALE (3)
 
 #include "misc.h"
 
-
 #include "fragment_shader.h"
 #include "vertex_shader.h"
-
-
-#include "audio.c"
-#include "shader.c"
 
 #include "loader.h"
 #include "remake.h"
@@ -60,14 +55,10 @@
 
 #include "loader_internal.h"
 
-// static uint32_t buffer[BUFFER_WIDTH * BUFFER_HEIGHT];
+#include "audio.c"
+#include "shader.c"
 
-#ifdef _WIN32
-#include "win32_library_loader.c"
-#elif __linux__
-#include "linux_library_loader.c"
-#endif
-
+#include "library_loader.c"
 
 // [=]===^=====================================================================================^===[=]
 // NOTE(peter): We can steal F11 and F12 here, and the shift, ctrl, alt, version of them, they are not on the Amiga keyboard.
@@ -77,10 +68,12 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 
 	struct loader_state *state = glfwGetWindowUserPointer(window);
 
+	// NOTE(peter): Toggle CRT emulation
 	if(key == GLFW_KEY_F11 && action == GLFW_PRESS) {
 		state->toggle_crt_emulation = !state->toggle_crt_emulation;
 	}
 
+	// NOTE(peter): Toggle fullscreen
 	if(glfwGetKey(window, GLFW_KEY_F12) == GLFW_PRESS) {
 		if(glfwGetWindowMonitor(window) == 0) {
 
@@ -96,18 +89,38 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 		}
 	}
 
-	// if(key_callback) {
-	// 	key_callback(state, key, scancode, action, mods);
-	// }
+	// NOTE(peter): Update the keyboard_state
+	if(action == GLFW_PRESS) {
+		state->shared.keyboard_state[key] = 1;
+	} else if(action == GLFW_RELEASE) {
+		state->shared.keyboard_state[key] = 0;
+	}
+
+	// NOTE(peter): Test code to switch between SELECTOR and a REMAKE, this will stop working when I remove the hardcoded
+	if(action == GLFW_RELEASE) {
+		if(key == GLFW_KEY_1) {
+			state->mode = REMAKE_MODE;
+		} else if(key == GLFW_KEY_2) {
+			state->mode = SELECTOR_MODE;
+		}
+	}
+
+	// NOTE(peter): Call the key_callback of the selector or remake if it is defined.
+	switch(state->mode) {
+		case REMAKE_MODE: {
+			if(state->remake.key_callback) {
+				state->remake.key_callback(&state->shared, key);
+			}
+		} break;
+		case SELECTOR_MODE: {
+			if(state->selector.key_callback) {
+				state->selector.key_callback(&state->shared, key);
+			}
+		} break;
+	}
 }
 
 // [=]===^=====================================================================================^===[=]
-static void error_callback(int e, const char *d) {
-	printf("Error %d: %s\n", e, d);
-}
-
-// [=]===^=====================================================================================^===[=]
-
 static void framebuffer_callback(GLFWwindow *window, int width, int height) {
 	struct loader_state *state = glfwGetWindowUserPointer(window);
 
@@ -127,26 +140,25 @@ static void framebuffer_callback(GLFWwindow *window, int width, int height) {
 }
 
 // [=]===^=====================================================================================^===[=]
+static void error_callback(int e, const char *d) {
+	printf("Error %d: %s\n", e, d);
+}
+
+// [=]===^=====================================================================================^===[=]
 int main(int argc, char **argv) {
 	GLuint shader_program;
 	GLuint vao;
 	GLuint vbo;
 	GLuint ebo;
 	GLuint texture;
-	int uniform_resolution;
-	int uniform_src_image_size;
-	int uniform_contrast;
-	int uniform_saturation;
-	int uniform_brightness;
-	int uniform_tone;
-	int uniform_crt_emulation;
-	bool running;
 	GLFWwindow *window;
 
-	struct loader_state state;
+	struct loader_state state = {};
+	state.toggle_crt_emulation = true;
 
 	load_remakes(&state);
 	load_selector(&state);
+	load_remake(&state, 0);
 
 #ifdef _WIN32
 	timeBeginPeriod(1);
@@ -156,7 +168,7 @@ int main(int argc, char **argv) {
 #endif
 
 	// TODO(peter): Setup a dummy callback that output just zeroes to the buffer...
-	audio_initialize();
+	audio_initialize(&state);
 	glfwSetErrorCallback(error_callback);
 
 	if(glfwInit()) {
@@ -182,7 +194,7 @@ int main(int argc, char **argv) {
 			glfwSetWindowUserPointer(window, &state);
 			glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);		// NOTE(peter): Sticky mouse buttons, so we don't miss any events..
 
-			state.shared.buffer = malloc(BUFFER_WIDTH * BUFFER_HEIGHT);
+			state.shared.buffer = malloc(BUFFER_WIDTH * BUFFER_HEIGHT * sizeof(uint32_t));
 
 			state.viewport.x = 0;
 			state.viewport.y = 0;
@@ -214,13 +226,12 @@ int main(int argc, char **argv) {
 			glAttachShader(shader_program, vertex_shader);
 			glAttachShader(shader_program, fragment_shader);
 			glLinkProgram(shader_program);
-			uniform_resolution		= glGetUniformLocation(shader_program, "resolution");
-			uniform_src_image_size	= glGetUniformLocation(shader_program, "src_image_size");
-			uniform_contrast			= glGetUniformLocation(shader_program, "contrast");
-			uniform_saturation		= glGetUniformLocation(shader_program, "saturation");
-			uniform_brightness		= glGetUniformLocation(shader_program, "brightness");
-			uniform_tone				= glGetUniformLocation(shader_program, "tone_data");
-			uniform_crt_emulation	= glGetUniformLocation(shader_program, "crt_emulation");
+			int uniform_resolution		= glGetUniformLocation(shader_program, "resolution");
+			int uniform_src_image_size	= glGetUniformLocation(shader_program, "src_image_size");
+			int uniform_saturation		= glGetUniformLocation(shader_program, "saturation");
+			int uniform_brightness		= glGetUniformLocation(shader_program, "brightness");
+			int uniform_tone				= glGetUniformLocation(shader_program, "tone_data");
+			int uniform_crt_emulation	= glGetUniformLocation(shader_program, "crt_emulation");
 			glUseProgram(shader_program);
 			glDeleteShader(vertex_shader);
 			glDeleteShader(fragment_shader);
@@ -248,7 +259,7 @@ int main(int argc, char **argv) {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, BUFFER_WIDTH, BUFFER_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state.shared.buffer);
 
-			running = true;
+			bool running = true;
 
 			float contrast = 1.0f;
 			float saturation = 0.0f;
@@ -276,16 +287,19 @@ int main(int argc, char **argv) {
 					glfwSetWindowShouldClose(window, true);
 				}
 
-uint32_t demo_state = 0;
-
-				switch(demo_state) {
-					case 0: {
-						state.selector.mainloop_callback(&state.shared);
+				switch(state.mode) {
+					case REMAKE_MODE: {
+						if(state.remake.mainloop_callback) {
+							state.remake.mainloop_callback(&state.shared);
+						}
 					} break;
-					case 1: {
-						// demo_mainloop();
-					}
+					case SELECTOR_MODE: {
+						if(state.selector.mainloop_callback) {
+							state.selector.mainloop_callback(&state.shared);
+						}
+					} break;
 				}
+
 
 				// NOTE(peter): Rendering stuff
 				glViewport(state.viewport.x, state.viewport.y, state.viewport.w, state.viewport.h);
@@ -300,7 +314,6 @@ uint32_t demo_state = 0;
 				glUniform2f(uniform_src_image_size, (float)BUFFER_WIDTH, (float)BUFFER_HEIGHT);
 				glUniform2f(uniform_resolution, state.viewport.w, state.viewport.h);
 				glUniform1f(uniform_brightness, brightness);
-				glUniform1f(uniform_contrast, contrast);
 				glUniform4f(uniform_tone, tone_dat[0], tone_dat[1], tone_dat[2], tone_dat[3]);
 				glUniform1i(uniform_crt_emulation, state.toggle_crt_emulation);
 				glBindVertexArray(vao);
