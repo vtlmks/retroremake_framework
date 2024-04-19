@@ -56,7 +56,7 @@ dkms.conf
 loader/vertex_shader.h
 loader/fragment_shader.h
 loader/include/GLFW
-bin
-include
-remakes
-selectors
+/bin/
+/include/
+/remakes/
+/selectors/
