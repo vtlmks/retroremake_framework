@@ -309,7 +309,6 @@ int main(int argc, char **argv) {
 					} break;
 				}
 
-
 				// NOTE(peter): Rendering stuff
 				glViewport(state.viewport.x, state.viewport.y, state.viewport.w, state.viewport.h);
 				glClearColor(0.f, 0.f, 0.f, 0.f);

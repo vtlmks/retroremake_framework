@@ -30,6 +30,17 @@ static void audio_callback(void *userdata, int16_t *audio_buffer, size_t frames)
 }
 
 #ifdef __linux__
+
+/*
+ *            :::        ::::::::::: ::::    ::: :::    ::: :::    :::
+ *            :+:            :+:     :+:+:   :+: :+:    :+: :+:    :+:
+ *            +:+            +:+     :+:+:+  +:+ +:+    +:+  +:+  +:+
+ *            +#+            +#+     +#+ +:+ +#+ +#+    +:+   +#++:+
+ *            +#+            +#+     +#+  +#+#+# +#+    +#+  +#+  +#+
+ *            #+#            #+#     #+#   #+#+# #+#    #+# #+#    #+#
+ *            ########## ########### ###    ####  ########  ###    ###
+ */
+
 #include <pthread.h>
 #include <alsa/asoundlib.h>
 
@@ -53,7 +64,7 @@ static void *audio_thread_func(void *arg) {
 
 static void audio_initialize(struct loader_state *state) {
 	snd_pcm_open(&pcm, "default", SND_PCM_STREAM_PLAYBACK, 0);
-	snd_pcm_set_params(pcm, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, NUM_CHANNELS, SAMPLE_RATE, 1, 100000);
+	snd_pcm_set_params(pcm, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, NUM_CHANNELS, SAMPLE_RATE, 1, 20000);	// 20000 is in us, we want 20ms so 20000
 	snd_pcm_start(pcm);
 	pthread_create(&audio_thread, 0, audio_thread_func, state);
 }
@@ -66,6 +77,17 @@ static void audio_shutdown() {
 }
 
 #elif _WIN32
+
+/*
+ *  :::       ::: ::::::::::: ::::    ::: :::::::::   ::::::::  :::       :::  ::::::::
+ *  :+:       :+:     :+:     :+:+:   :+: :+:    :+: :+:    :+: :+:       :+: :+:    :+:
+ *  +:+       +:+     +:+     :+:+:+  +:+ +:+    +:+ +:+    +:+ +:+       +:+ +:+
+ *  +#+  +:+  +#+     +#+     +#+ +:+ +#+ +#+    +:+ +#+    +:+ +#+  +:+  +#+ +#++:++#++
+ *  +#+ +#+#+ +#+     +#+     +#+  +#+#+# +#+    +#+ +#+    +#+ +#+ +#+#+ +#+        +#+
+ *   #+#+# #+#+#      #+#     #+#   #+#+# #+#    #+# #+#    #+#  #+#+# #+#+#  #+#    #+#
+ *    ###   ###   ########### ###    #### #########   ########    ###   ###    ########
+ */
+
 
 #include <windows.h>
 #include <mmsystem.h>
@@ -114,20 +136,14 @@ static void audio_initialize(struct loader_state *state) {
 	waveOutOpen(&wave_out, WAVE_MAPPER, &wave_format, (DWORD_PTR)waveOutProc, (DWORD_PTR)state, CALLBACK_FUNCTION);
 
 	for(uint32_t i = 0; i < BUFFER_COUNT; ++i) {
+		memset(&wave_header[i], 0, sizeof(WAVEHDR));
 		wave_header[i].lpData = waveout_buffer[i];
 		wave_header[i].dwBufferLength = BUFFER_SIZE;
-		wave_header[i].dwBytesRecorded = 0;
-		wave_header[i].dwUser = 0;
-		wave_header[i].dwFlags = 0;
-		wave_header[i].dwLoops = 0;
-		wave_header[i].lpNext = 0;
-		wave_header[i].reserved = 0;
 		waveOutPrepareHeader(wave_out, &wave_header[i], sizeof(WAVEHDR));
 	}
 
 	for(uint32_t i = 0; i < BUFFER_COUNT; ++i) {
 		memset(wave_header[i].lpData, 0, BUFFER_SIZE);
-		// audio_callback((int16_t*)wave_header[i].lpData, BUFFER_SIZE/FRAME_SIZE);
 		waveOutWrite(wave_out, &wave_header[i], sizeof(WAVEHDR));
 	}
 }

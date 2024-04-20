@@ -189,6 +189,8 @@ void close_remake(struct loader_state *state) {
 }
 
 
+#elif defined(__linux__)
+
 /*
  *            :::        ::::::::::: ::::    ::: :::    ::: :::    :::
  *            :+:            :+:     :+:+:   :+: :+:    :+: :+:    :+:
@@ -198,9 +200,6 @@ void close_remake(struct loader_state *state) {
  *            #+#            #+#     #+#   #+#+# #+#    #+# #+#    #+#
  *            ########## ########### ###    ####  ########  ###    ###
  */
-
-
-#elif defined(__linux__)
 
 /*
  * Traverses the remakes/ directory and obtains information from every shared library that matches remake_*.so

@@ -52,7 +52,6 @@ Mkfile.old
 dkms.conf
 
 # Local stuff.. Files and directories
-.vscode
 loader/vertex_shader.h
 loader/fragment_shader.h
 loader/include/GLFW
