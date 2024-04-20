@@ -125,14 +125,13 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_P
 }
 
 static void audio_initialize(struct loader_state *state) {
-	WAVEFORMATEX wave_format;
+	WAVEFORMATEX wave_format = {0};
 	wave_format.wFormatTag = WAVE_FORMAT_PCM;
 	wave_format.nChannels = NUM_CHANNELS;
 	wave_format.nSamplesPerSec = SAMPLE_RATE;
 	wave_format.wBitsPerSample = 16;
 	wave_format.nBlockAlign = wave_format.nChannels * (wave_format.wBitsPerSample / 8);
 	wave_format.nAvgBytesPerSec = wave_format.nSamplesPerSec * wave_format.nBlockAlign;
-	wave_format.cbSize = 0;
 	waveOutOpen(&wave_out, WAVE_MAPPER, &wave_format, (DWORD_PTR)waveOutProc, (DWORD_PTR)state, CALLBACK_FUNCTION);
 
 	for(uint32_t i = 0; i < BUFFER_COUNT; ++i) {
