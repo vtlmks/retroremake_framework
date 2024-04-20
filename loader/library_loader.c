@@ -177,6 +177,7 @@ void load_remake(struct loader_state *state, uint32_t index) {
 		fprintf(stderr, "Error: Unable to get function pointers.\n");
 		exit(EXIT_FAILURE);
 	}
+	state->remake.setup(&state->shared);
 }
 
 void close_remake(struct loader_state *state) {
@@ -325,7 +326,7 @@ static void load_remake(struct loader_state *state, uint32_t index) {
 	}
 
 	// Get function pointers using dlsym() and store them in the global variable 'remake'
-	// remake.get_information = (void (*)(struct part_state *))dlsym(remake_handle, "get_information");
+	// state->remake.get_information = (void (*)(struct remake_state *))dlsym(remake_handle, "get_information");
 	state->remake.setup = (void (*)(struct loader_shared_state *))dlsym(state->remake_handle, "setup");
 	state->remake.cleanup = (void (*)(struct loader_shared_state *))dlsym(state->remake_handle, "cleanup");
 	state->remake.audio_callback = (void (*)(struct loader_shared_state *, int16_t *, size_t))dlsym(state->remake_handle, "audio_callback");
@@ -335,6 +336,7 @@ static void load_remake(struct loader_state *state, uint32_t index) {
 		fprintf(stderr, "Error: %s\n", dlerror());
 		exit(EXIT_FAILURE);
 	}
+	state->remake.setup(&state->shared);
 }
 
 /*

@@ -20,7 +20,7 @@ EXPORT void cleanup(struct loader_shared_state *state) {
 EXPORT void key_callback(struct loader_shared_state *state, int key) {
 }
 
-EXPORT void audio_callback(struct loader_shared_state *state) {
+EXPORT void audio_callback(struct loader_shared_state *state, int16_t *audio_buffer, size_t frames) {
 }
 
 EXPORT int32_t mainloop_callback(struct loader_shared_state *state) {

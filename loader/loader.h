@@ -49,6 +49,7 @@ struct loader_shared_state {
 	char keyboard_state[512];			// You can check in this array what keys are pressed, they are defined below!
 	int32_t mouse_delta_x;
 	int32_t mouse_delta_y;
+	int32_t frame_number;
 	bool grab_cursor;
 };
 

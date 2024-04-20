@@ -98,9 +98,9 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 
 	// NOTE(peter): Test code to switch between SELECTOR and a REMAKE, this will stop working when I remove the hardcoded
 	if(action == GLFW_RELEASE) {
-		if(key == GLFW_KEY_1) {
-			state->mode = REMAKE_MODE;
-		} else if(key == GLFW_KEY_2) {
+		if(key == GLFW_KEY_2) {
+			state->mode = LOAD_REMAKE_MODE;
+		} else if(key == GLFW_KEY_1) {
 			state->mode = SELECTOR_MODE;
 		}
 	}
@@ -263,7 +263,7 @@ int main(int argc, char **argv) {
 
 			float contrast = 1.0f;
 			float saturation = 0.0f;
-			float brightness = 1.0f;
+			float brightness = 1.2f;
 
 			/*
 			 * Move this into the mainloop if change of contrast/saturation is added as an interactive thing.
@@ -272,12 +272,6 @@ int main(int argc, char **argv) {
 			CrtsTone(tone_dat, contrast, saturation, INPUT_THIN, INPUT_MASK);
 
 			double next_update = glfwGetTime() + FRAME_TIME;
-
-			char tmp[512];
-			snprintf(tmp, sizeof(tmp), "%s - %s", state.selector.window_title, "Middle Mouse to release mouse - ESC to Exit");
-
-			// glfwSetWindowTitle(window, selector.window_title);
-			glfwSetWindowTitle(window, tmp);
 
 			while(running && !glfwWindowShouldClose(window)) {
 				glfwPollEvents();
@@ -288,15 +282,30 @@ int main(int argc, char **argv) {
 				}
 
 				switch(state.mode) {
+					case SELECTOR_MODE: {
+						if(state.selector.mainloop_callback) {
+							state.selector.mainloop_callback(&state.shared);
+						}
+					} break;
+					case LOAD_REMAKE_MODE: {
+						// load_remake(&state, state->selected_mode);
+
+// BUG: state.remake.window_title is not filled in, make sure that we call get_information when we load a remake.
+
+						char window_title[512];
+						snprintf(window_title, sizeof(window_title), "%s - %s", state.remakes[0].window_title, "Middle Mouse to release mouse - ESC to Exit");
+						glfwSetWindowTitle(window, window_title);
+						state.mode = REMAKE_MODE;
+					} break;
 					case REMAKE_MODE: {
 						if(state.remake.mainloop_callback) {
 							state.remake.mainloop_callback(&state.shared);
 						}
 					} break;
-					case SELECTOR_MODE: {
-						if(state.selector.mainloop_callback) {
-							state.selector.mainloop_callback(&state.shared);
-						}
+					case UNLOAD_REMAKE_MODE: {
+						char window_title[512];
+						snprintf(window_title, sizeof(window_title), "%s - %s", state.selector.window_title, "Middle Mouse to release mouse - ESC to Exit");
+						state.mode = SELECTOR_MODE;
 					} break;
 				}
 
@@ -340,7 +349,7 @@ int main(int argc, char **argv) {
 				} else { next_update = glfwGetTime(); }						// We are in the future, next_updates is set to now to not fastforward
 				next_update += FRAME_TIME;
 
-				// part_state.frame_number++;
+				state.shared.frame_number++;
 				// part_state.ms_since_start += (uint32_t)(1000.f / FRAMES_PER_SECOND);
 			}
 			glfwDestroyWindow(window);

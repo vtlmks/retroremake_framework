@@ -26,7 +26,9 @@ struct viewport { float x, y, w, h; };
 
 enum program_mode {
 	SELECTOR_MODE,
-	REMAKE_MODE
+	LOAD_REMAKE_MODE,
+	REMAKE_MODE,
+	UNLOAD_REMAKE_MODE
 };
 
 /*

@@ -7,7 +7,7 @@
 #define NUM_CHANNELS 2
 #define FRAME_SIZE (NUM_CHANNELS * sizeof(short))
 
-void audio_callback(void *userdata, int16_t *audio_buffer, size_t frames) {
+static void audio_callback(void *userdata, int16_t *audio_buffer, size_t frames) {
 	struct loader_state *state = userdata;
 	switch(state->mode) {
 		case REMAKE_MODE: {
@@ -15,11 +15,17 @@ void audio_callback(void *userdata, int16_t *audio_buffer, size_t frames) {
 				state->remake.audio_callback(&state->shared, audio_buffer, frames);
 			}
 		} break;
+		case LOAD_REMAKE_MODE: {
+			memset(audio_buffer, 0, frames * FRAME_SIZE);
+		}
 		case SELECTOR_MODE: {
 			if(state->selector.audio_callback) {
 				state->selector.audio_callback(&state->shared, audio_buffer, frames);
 			}
 		} break;
+		case UNLOAD_REMAKE_MODE: {
+			memset(audio_buffer, 0, frames * FRAME_SIZE);
+		}
 	}
 }
 
@@ -32,9 +38,9 @@ void audio_callback(void *userdata, int16_t *audio_buffer, size_t frames) {
 snd_pcm_t *pcm;
 pthread_t audio_thread;
 
-uint16_t alsa_buffer[BUFFER_SIZE];
+int16_t alsa_buffer[BUFFER_SIZE];
 
-void *audio_thread_func(void *arg) {
+static void *audio_thread_func(void *arg) {
 	while (1) {
 		snd_pcm_wait(pcm, -1);
 		audio_callback(arg, alsa_buffer, BUFFER_SIZE / FRAME_SIZE);

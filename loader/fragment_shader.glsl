@@ -13,7 +13,7 @@ uniform sampler2D iChannel0;
 // NOTE: this shader was taken from https://www.shadertoy.com/view/MtSfRK it's in the public domain.
 //       modified and butchered; please don't use in other projects, I've probably destroyed it..
 //--------------------------------------------------------------
-float black_level = 0.05;
+float black_level = 0.02;
 
 // Setup the function which returns input image color
 vec3 CrtsFetch(vec2 uv) {
