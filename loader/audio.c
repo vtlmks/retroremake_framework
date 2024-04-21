@@ -98,7 +98,7 @@ HWAVEOUT wave_out;
 WAVEHDR wave_header[BUFFER_COUNT];
 int8_t waveout_buffer[BUFFER_COUNT][BUFFER_SIZE];
 
-void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2) {
+static void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2) {
 	if(uMsg == WOM_DONE) {
 		struct loader_state *state = (struct loader_state *)dwInstance;
 

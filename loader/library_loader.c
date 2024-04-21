@@ -325,6 +325,7 @@ static void load_remake(struct loader_state *state, uint32_t index) {
 	}
 
 	// Get function pointers using dlsym() and store them in the global variable 'remake'
+	// Should I get the pointer to get_information? it's not to be used after the scan for remakes?
 	// state->remake.get_information = (void (*)(struct remake_state *))dlsym(remake_handle, "get_information");
 	state->remake.setup = (void (*)(struct loader_shared_state *))dlsym(state->remake_handle, "setup");
 	state->remake.cleanup = (void (*)(struct loader_shared_state *))dlsym(state->remake_handle, "cleanup");
@@ -348,7 +349,6 @@ static void close_remake(struct loader_state *state) {
 		state->remake_handle = NULL;
 	}
 }
-
 
 #endif
 

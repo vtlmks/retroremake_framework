@@ -289,7 +289,6 @@ int main(int argc, char **argv) {
 					} break;
 					case LOAD_REMAKE_MODE: {
 						// load_remake(&state, state->selected_mode);
-
 // BUG: state.remake.window_title is not filled in, make sure that we call get_information when we load a remake.
 
 						char window_title[512];
@@ -313,6 +312,7 @@ int main(int argc, char **argv) {
 				glViewport(state.viewport.x, state.viewport.y, state.viewport.w, state.viewport.h);
 				glClearColor(0.f, 0.f, 0.f, 0.f);
 				glClear(GL_COLOR_BUFFER_BIT);
+
 				// These values are set once, move inside the mainloop if you want to vary any one of them.
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, texture);
