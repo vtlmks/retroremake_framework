@@ -14,6 +14,4 @@ x86_64-w64-mingw32-gcc -O2 -march=x86-64-v2 -mtune=native loader.c -o loader -Ii
 [ -e loader ] && mv loader ../bin
 [ -e loader.exe ] && mv loader.exe ../bin
 
-cp remake.h ../include
-cp selector.h ../include
-cp loader.h ../include
+cp loader.h remake.h selector.h ../include
