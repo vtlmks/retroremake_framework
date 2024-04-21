@@ -58,7 +58,6 @@ static void *audio_thread_func(void *arg) {
 		snd_pcm_writei(pcm, alsa_buffer, BUFFER_SIZE / FRAME_SIZE);
 		pthread_testcancel();
 	}
-
 	return 0;
 }
 

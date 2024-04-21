@@ -1,6 +1,5 @@
 #pragma once
 
-
 /*
  * -=[*]=- remake struct documentation
  *
