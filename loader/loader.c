@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
 	GLuint texture;
 	GLFWwindow *window;
 
-	struct loader_state state = {};
+	struct loader_state state = {0};
 	state.toggle_crt_emulation = true;
 
 	load_remakes(&state);

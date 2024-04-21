@@ -135,7 +135,7 @@ void load_selector(struct loader_state *state) {
 		HMODULE handle = LoadLibrary(path);
 		if(handle != NULL) {
 			// Get pointers to functions in the struct and store them in the global 'selector' struct
-			state->selector.setup = (void (*)(struct loader_shared_state *, struct remake_state *, uint32_t))GetProcAddress(handle, "setup");
+			state->selector.setup = (void (*)(struct selector_state *, struct remake_state *, uint32_t))GetProcAddress(handle, "setup");
 			state->selector.cleanup = (void (*)(struct loader_shared_state *))GetProcAddress(handle, "cleanup");
 			state->selector.audio_callback = (void (*)(struct loader_shared_state *, int16_t *, size_t))GetProcAddress(handle, "audio_callback");
 			state->selector.key_callback = (void (*)(struct loader_shared_state *, int))GetProcAddress(handle, "key_callback");
@@ -143,7 +143,7 @@ void load_selector(struct loader_state *state) {
 
 			// Call the setup function
 			if(state->selector.setup != NULL) {
-				state->selector.setup(&state->shared, state->remakes, state->remake_count);
+				state->selector.setup(&state->selector, state->remakes, state->remake_count);
 			}
 			free(selected_file);
 		}
@@ -306,7 +306,7 @@ static void load_selector(struct loader_state *state) {
 
 // 			// Call the setup function
 			if(state->selector.setup) {
-				state->selector.setup(&state->shared, 0, 0);
+				state->selector.setup(&state->selector, 0, 0);
 			}
 			free(selected_file);
 		}

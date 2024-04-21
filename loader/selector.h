@@ -14,8 +14,7 @@
 
 struct selector_state {
 	char window_title[80];
-	void (*get_information)(struct selector_state *state);
-	void (*setup)(struct loader_shared_state *state, struct remake_state *remakes, uint32_t num_remakes);
+	void (*setup)(struct selector_state *state, struct remake_state *remakes, uint32_t num_remakes);
 	void (*cleanup)(struct loader_shared_state *state);
 	void (*audio_callback)(struct loader_shared_state *state, int16_t *audio_buffer, size_t frames);
 	void (*key_callback)(struct loader_shared_state *state, int key);
