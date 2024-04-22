@@ -41,7 +41,7 @@
 #endif
 #include "opengl.c"
 
-// #define GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 // Default scale
@@ -75,6 +75,7 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 	if(key == GLFW_KEY_F11 && action == GLFW_PRESS) {
 		state->toggle_crt_emulation = !state->toggle_crt_emulation;
 	}
+
 
 	// NOTE(peter): Toggle fullscreen
 	if(glfwGetKey(window, GLFW_KEY_F12) == GLFW_PRESS) {
@@ -143,6 +144,33 @@ static void framebuffer_callback(GLFWwindow *window, int width, int height) {
 }
 
 // [=]===^=====================================================================================^===[=]
+static void mouse_move_callback(GLFWwindow* window, double xpos, double ypos) {
+	struct loader_state *state = glfwGetWindowUserPointer(window);
+
+	int windowWidth, windowHeight;
+	glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
+
+	// Calculate the ratio of window size to buffer size
+	double widthRatio = (double)windowWidth / BUFFER_WIDTH;
+	double heightRatio = (double)windowHeight / BUFFER_HEIGHT;
+
+	state->shared.mouse_x = (int)(xpos / widthRatio);
+	state->shared.mouse_y = (int)(ypos / heightRatio);
+	// printf("x: %d  y: %d\n", state->shared.mouse_x, state->shared.mouse_y);
+}
+
+// [=]===^=====================================================================================^===[=]
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+	struct loader_state *state = glfwGetWindowUserPointer(window);
+
+	// NOTE(peter): Update the mouse_button_state
+	if(action == GLFW_PRESS) {
+		state->shared.mouse_button_state[button] = 1;
+	} else if(action == GLFW_RELEASE) {
+		state->shared.mouse_button_state[button] = 0;
+	}
+}
+// [=]===^=====================================================================================^===[=]
 static void error_callback(int e, const char *d) {
 	printf("Error %d: %s\n", e, d);
 }
@@ -187,11 +215,16 @@ int main(int argc, char **argv) {
 
 		if((window = glfwCreateWindow(scaled_window_width, scaled_window_height, "This will change when remake/selector is loaded", 0, 0))) {
 			glfwMakeContextCurrent(window);
-//			gl3wInit();
 			gl_init(&opengl);
 			glfwSwapInterval(0);																	// NOTE(peter): We handle frame-synchronisation ourself.
 
+			if(glfwRawMouseMotionSupported()) {
+				glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+			}
+
 			glfwSetKeyCallback(window, key_callback);
+			glfwSetCursorPosCallback(window, mouse_move_callback);
+			glfwSetMouseButtonCallback(window, mouse_button_callback);
 			glfwSetFramebufferSizeCallback(window, framebuffer_callback);
 			glfwSetWindowAspectRatio(window, 4, 3);
 			glfwSetWindowSizeLimits(window, min_window_width, min_window_height, -1, -1);

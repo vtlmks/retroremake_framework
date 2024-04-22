@@ -13,12 +13,6 @@
 #define EXPORT
 #endif
 
-
-// TODO :  setup a keystate[] where we store what keys are held down for the frame.
-//         make a char key;  that is zero if no key is pressed, else contain the current
-//         pressed key, or last key pressed on the keyboard if multiple keys are pressed
-//         simultaneous, to be able to have hidden parts accessible with a string,
-
 //         the deltamouse stuff + a byte or somesuch with information about buttonstate of mouse
 //         should do something to fetch joypad, to emulate mouse.
 //         we also need to emulate joy on keyboard for people who has no joystick and want to enter
@@ -47,11 +41,16 @@ struct loader_shared_state {
 	uint32_t *buffer;						// This is the screen, [BUFFER_WIDTH * BUFFER_HEIGHT] in size, RGBA format.
 	void *userdata;						// This can be filled in with a pointer to a struct containing data for the selector/remake.
 	char keyboard_state[512];			// You can check in this array what keys are pressed, they are defined below!
-	int32_t mouse_delta_x;
-	int32_t mouse_delta_y;
+	char mouse_button_state[8];
+	int32_t mouse_x;
+	int32_t mouse_y;
 	int32_t frame_number;
 	bool grab_cursor;
 };
+
+#define AMIGA_MOUSE_BUTTON_LEFT		0
+#define AMIGA_MOUSE_BUTTON_RIGHT		1
+#define AMIGA_MOUSE_BUTTON_MIDDLE	2
 
 #define AMIGA_KEY_SPACE              32
 #define AMIGA_KEY_APOSTROPHE         39  /* ' */
