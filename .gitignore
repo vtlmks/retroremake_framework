@@ -63,4 +63,5 @@ README.md
 TODO
 directory-structure.txt
 notes.txt
-
+loader/.loader_linux
+loader/.loader_windows

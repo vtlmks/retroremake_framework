@@ -35,10 +35,13 @@
 #include <inttypes.h>
 
 #include "glcorearb.h"
-#include "gl3w.h"
-#include "gl3w.c"
 
-#define GLFW_INCLUDE_NONE
+#ifdef __linux__
+#include <GL/glx.h>
+#endif
+#include "opengl.c"
+
+// #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 // Default scale
@@ -184,7 +187,8 @@ int main(int argc, char **argv) {
 
 		if((window = glfwCreateWindow(scaled_window_width, scaled_window_height, "This will change when remake/selector is loaded", 0, 0))) {
 			glfwMakeContextCurrent(window);
-			gl3wInit();
+//			gl3wInit();
+			gl_init(&opengl);
 			glfwSwapInterval(0);																	// NOTE(peter): We handle frame-synchronisation ourself.
 
 			glfwSetKeyCallback(window, key_callback);
