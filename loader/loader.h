@@ -22,6 +22,14 @@
  * -=[*]=- part_state struct documentation
  */
 
+
+struct loader_info {
+	char lib_path[256];
+	char release_name[40];
+	char display_name[80];
+	char author_name[40];
+};
+
 struct loader_shared_state {
 	uint32_t *buffer;						// This is the screen, [BUFFER_WIDTH * BUFFER_HEIGHT] in size, RGBA format.
 	void *remake_userdata;				// This can be filled in with a pointer to a struct containing data for the selector/remake.
@@ -36,7 +44,7 @@ struct loader_shared_state {
 
 #define AMIGA_MOUSE_BUTTON_LEFT		0
 #define AMIGA_MOUSE_BUTTON_RIGHT		1
-#define AMIGA_MOUSE_BUTTON_MIDDLE	2	// cant be used, as the main program is set to lock the cursor when pressing middle mouse to make mousemovement work inside demos
+#define AMIGA_MOUSE_BUTTON_MIDDLE	2	// cant be used, as the main program is set to lock the cursor when pressing middle mouse to make mousemovement work inside remakes.
 
 #define AMIGA_KEY_SPACE              32
 #define AMIGA_KEY_APOSTROPHE         39  /* ' */

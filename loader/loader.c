@@ -112,13 +112,13 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 	// NOTE(peter): Call the key_callback of the selector or remake if it is defined.
 	switch(state->mode) {
 		case REMAKE_MODE: {
-			if(state->remake.key_callback) {
-				state->remake.key_callback(&state->shared, key);
+			if(state->remake->key_callback) {
+				state->remake->key_callback(&state->shared, key);
 			}
 		} break;
 		case SELECTOR_MODE: {
-			if(state->selector.key_callback) {
-				state->selector.key_callback(&state->shared, key);
+			if(state->selector->key_callback) {
+				state->selector->key_callback(&state->shared, key);
 			}
 		} break;
 	}
@@ -338,8 +338,8 @@ int main(int argc, char **argv) {
 
 				switch(state.mode) {
 					case SELECTOR_MODE: {
-						if(state.selector.mainloop_callback) {
-							state.selector.mainloop_callback(&state.shared);
+						if(state.selector->mainloop_callback) {
+							state.selector->mainloop_callback(&state.shared);
 						}
 					} break;
 					case LOAD_REMAKE_MODE: {
@@ -347,18 +347,18 @@ int main(int argc, char **argv) {
 // BUG: state.remake.window_title is not filled in, make sure that we call get_information when we load a remake.
 
 						char window_title[512];
-						snprintf(window_title, sizeof(window_title), "%s - %s", state.remakes[0].window_title, "Middle Mouse to release mouse - ESC to Exit");
+						snprintf(window_title, sizeof(window_title), "%s - %s", state.remakes[0].release_name, "Middle Mouse to release mouse - ESC to Exit");
 						glfwSetWindowTitle(window, window_title);
 						state.mode = REMAKE_MODE;
 					} break;
 					case REMAKE_MODE: {
-						if(state.remake.mainloop_callback) {
-							state.remake.mainloop_callback(&state.shared);
+						if(state.remake->mainloop_callback) {
+							state.remake->mainloop_callback(&state.shared);
 						}
 					} break;
 					case UNLOAD_REMAKE_MODE: {
 						char window_title[512];
-						snprintf(window_title, sizeof(window_title), "%s - %s", state.selector.window_title, "Middle Mouse to release mouse - ESC to Exit");
+						snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
 						state.mode = SELECTOR_MODE;
 					} break;
 				}

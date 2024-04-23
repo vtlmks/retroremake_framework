@@ -36,9 +36,9 @@ enum program_mode {
  *
  */
 struct loader_state {
-	struct selector_state selector;		// Active selector
-	struct remake_state remake;			// Active remake
-	struct remake_state *remakes;			// Array of possible remakes.
+	struct selector_info *selector;		// Active selector
+	struct remake_info *remake;			// Active remake
+	struct loader_info *remakes;			// Array of loader_info structs, used by the selector to display names of remakes.
 	uint32_t remake_count;					// Number of remakes
 	bool toggle_crt_emulation;				// Toggle for the shader CRT emulation.
 	struct loader_shared_state shared;	//

@@ -19,14 +19,14 @@
 
 // Comparison function for qsort
 static int compare_release_name(const void *a, const void *b) {
-	const struct remake_state *part_a = (const struct remake_state *)a;
-	const struct remake_state *part_b = (const struct remake_state *)b;
+	const struct remake_info *part_a = (const struct remake_info *)a;
+	const struct remake_info *part_b = (const struct remake_info *)b;
 	return strcmp(part_a->release_name, part_b->release_name);
 }
 
 // Function to sort an array of part_state structs based on release_name
-static void sort_by_release_name(struct remake_state *remakes, size_t num_remakes) {
-	qsort(remakes, num_remakes, sizeof(struct remake_state), compare_release_name);
+static void sort_by_release_name(struct remake_info *remakes, size_t num_remakes) {
+	qsort(remakes, num_remakes, sizeof(struct remake_info), compare_release_name);
 }
 
 
@@ -61,7 +61,7 @@ void load_remakes(struct loader_state *state) {
 	}
 
 	// Allocate memory for the remake states
-	state->remakes = (struct remake_state *)calloc(state->remake_count, sizeof(struct remake_state));
+	state->remakes = (struct loader_info *)calloc(state->remake_count, sizeof(struct loader_info));
 
 	// Load the remakes
 	snprintf(search_path, sizeof(search_path), "remakes\\remake_*.dll");
@@ -71,11 +71,16 @@ void load_remakes(struct loader_state *state) {
 		do {
 			snprintf(state->remakes[index].lib_path, sizeof(state->remakes[index].lib_path), "remakes\\%s", find_data.cFileName);
 			HMODULE handle = LoadLibrary(state->remakes[index].lib_path);
-			if(handle != NULL) {
-				void (*get_info)(struct remake_state *) = (void (*)(struct remake_state *))GetProcAddress(handle, "get_information");
-				if(get_info) {
-					get_info(&state->remakes[index]);
-				}
+			if(handle) {
+
+				typedef struct remake_info* (*GetRemakeInfoFunc)();
+				GetRemakeInfoFunc get_remake_info = (GetRemakeInfoFunc)GetProcAddress(handle, "get_remake_information");
+
+				struct remake_info *info = get_remake_info();
+				strcpy_s(state->remakes[index].release_name, 40-1, info->release_name);
+				strcpy_s(state->remakes[index].display_name, 80-1, info->display_name);
+				strcpy_s(state->remakes[index].author_name, 40-1, info->author_name);
+
 				FreeLibrary(handle);
 			}
 			index++;
@@ -91,7 +96,7 @@ void load_selector(struct loader_state *state) {
 	HANDLE hFind = 0;
 	char search_path[MAX_PATH] = {0};
 	DWORD num_files = 0;
-	char *selected_file = NULL;
+	char *selected_file = 0;
 
 	snprintf(search_path, sizeof(search_path), "remakes\\selector_*.dll");
 	hFind = FindFirstFile(search_path, &find_data);
@@ -123,21 +128,18 @@ void load_selector(struct loader_state *state) {
 	}
 
 	// Load the selected file
-	if(selected_file != NULL) {
+	if(selected_file) {
 		char path[256];
 		snprintf(path, sizeof(path), "remakes\\%s", selected_file);
 		HMODULE handle = LoadLibrary(path);
-		if(handle != NULL) {
-			// Get pointers to functions in the struct and store them in the global 'selector' struct
-			state->selector.setup = (void (*)(struct selector_state *, struct remake_state *, uint32_t))GetProcAddress(handle, "setup");
-			state->selector.cleanup = (void (*)(struct loader_shared_state *))GetProcAddress(handle, "cleanup");
-			state->selector.audio_callback = (void (*)(struct loader_shared_state *, int16_t *, size_t))GetProcAddress(handle, "audio_callback");
-			state->selector.key_callback = (void (*)(struct loader_shared_state *, int))GetProcAddress(handle, "key_callback");
-			state->selector.mainloop_callback = (int (*)(struct loader_shared_state *))GetProcAddress(handle, "mainloop_callback");
+		if(handle) {
+			typedef struct selector_info* (*GetSelectorInfoFunc)();
+			GetSelectorInfoFunc get_selector_info = (GetSelectorInfoFunc)GetProcAddress(handle, "get_selector_information");
 
+			state->selector = get_selector_info();	//(struct selector_info *) GetProcAddress(state->remake_handle, "selector_information");
 			// Call the setup function
-			if(state->selector.setup != NULL) {
-				state->selector.setup(&state->selector, state->remakes, state->remake_count);
+			if(state->selector->setup) {
+				state->selector->setup(&state->shared, state->remakes, state->remake_count);
 			}
 			free(selected_file);
 		}
@@ -174,7 +176,7 @@ static void load_remakes(struct loader_state *state) {
 		closedir(dir);
 
 		// Allocate memory for the remake states
-		state->remakes = (struct remake_state *)calloc(state->remake_count, sizeof(struct remake_state));
+		state->remakes = (struct loader_info *)calloc(state->remake_count, sizeof(struct loader_info));
 
 
 		// Load the remakes
@@ -186,11 +188,11 @@ static void load_remakes(struct loader_state *state) {
 					snprintf(state->remakes[index].lib_path, sizeof(state->remakes[index].lib_path), "remakes/%s", ent->d_name);
 					void *handle = dlopen(state->remakes[index].lib_path, RTLD_LAZY);
 					if(handle) {
-						// Get the pointer to get_information() and call it
-						void (*get_info)(struct remake_state *) = dlsym(handle, "get_information");
-						if(get_info) {
-							get_info(&state->remakes[index]);
-						}
+						struct remake_info *info = dlsym(handle, "remake_information");
+						strlcpy(state->remakes[index].release_name, info->release_name, 40-1);		// These copies makes sure that length does not overflow
+						strlcpy(state->remakes[index].display_name, info->display_name, 80-1);
+						strlcpy(state->remakes[index].author_name, info->author_name, 40-1);
+
 						dlclose(handle);
 					}
 					index++;
@@ -253,16 +255,11 @@ static void load_selector(struct loader_state *state) {
 		snprintf(path, sizeof(path), "remakes/%s", selected_file);
 		void *handle = dlopen(path, RTLD_LAZY);
 		if(handle) {
-			// Get pointers to functions in the struct and store them in the global 'selector' struct
-			state->selector.setup = dlsym(handle, "setup");
-			state->selector.cleanup = dlsym(handle, "cleanup");
-			state->selector.audio_callback = dlsym(handle, "audio_callback");
-			state->selector.key_callback = dlsym(handle, "key_callback");
-			state->selector.mainloop_callback = dlsym(handle, "mainloop_callback");
+			state->selector = dlsym(handle, "selector_information");
 
 // 			// Call the setup function
-			if(state->selector.setup) {
-				state->selector.setup(&state->selector, state->remakes, state->remake_count);
+			if(state->selector->setup) {
+				state->selector->setup(&state->shared, state->remakes, state->remake_count);
 			}
 			free(selected_file);
 		}
@@ -288,13 +285,9 @@ static void load_remake(struct loader_state *state, uint32_t index) {
 		exit(EXIT_FAILURE);
 	}
 
-	// Get function pointers using GetProcAddress() and store them in the global variable 'remake'
-	// remake.get_information = (void (*)(struct remake_state *))GetProcAddress(remake_handle, "get_information");
-	state->remake.setup = (void (*)(struct loader_shared_state *))GetProcAddress(state->remake_handle, "setup");
-	state->remake.cleanup = (void (*)(struct loader_shared_state *))GetProcAddress(state->remake_handle, "cleanup");
-	state->remake.audio_callback = (void (*)(struct loader_shared_state *, int16_t *, size_t))GetProcAddress(state->remake_handle, "audio_callback");
-	state->remake.key_callback = (void (*)(struct loader_shared_state *, int))GetProcAddress(state->remake_handle, "key_callback");
-	state->remake.mainloop_callback = (int (*)(struct loader_shared_state *))GetProcAddress(state->remake_handle, "mainloop_callback");
+	typedef struct remake_info* (*GetRemakeInfoFunc)();
+	GetRemakeInfoFunc get_remake_info = (GetRemakeInfoFunc)GetProcAddress(state->remake_handle, "get_remake_information");
+	state->remake = get_remake_info();
 
 #elif defined(__linux__)
 	// Open the shared library
@@ -303,25 +296,12 @@ static void load_remake(struct loader_state *state, uint32_t index) {
 		fprintf(stderr, "Error: %s\n", dlerror());
 		exit(EXIT_FAILURE);
 	}
-
-	// Get function pointers using dlsym() and store them in the global variable 'remake'
-	// state->remake.get_information = (void (*)(struct remake_state *))dlsym(remake_handle, "get_information");
-	state->remake.setup = (void (*)(struct loader_shared_state *))dlsym(state->remake_handle, "setup");
-	state->remake.cleanup = (void (*)(struct loader_shared_state *))dlsym(state->remake_handle, "cleanup");
-	state->remake.audio_callback = (void (*)(struct loader_shared_state *, int16_t *, size_t))dlsym(state->remake_handle, "audio_callback");
-	state->remake.key_callback = (void (*)(struct loader_shared_state *, int))dlsym(state->remake_handle, "key_callback");
-	state->remake.mainloop_callback = (int (*)(struct loader_shared_state *))dlsym(state->remake_handle, "mainloop_callback");
+	state->remake = dlsym(state->remake_handle, "remake_information");
 #endif
 
-	if (!state->remake.setup ||
-		!state->remake.cleanup ||
-		!state->remake.audio_callback ||
-		!state->remake.key_callback ||
-		!state->remake.mainloop_callback) {
-		fprintf(stderr, "Error: Unable to get all function pointers.\n");
-		exit(EXIT_FAILURE);
+	if (state->remake->setup) {
+		state->remake->setup(&state->shared);
 	}
-	state->remake.setup(&state->shared);
 }
 
 

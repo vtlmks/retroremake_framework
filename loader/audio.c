@@ -11,16 +11,16 @@ static void audio_callback(void *userdata, int16_t *audio_buffer, size_t frames)
 	struct loader_state *state = userdata;
 	switch(state->mode) {
 		case REMAKE_MODE: {
-			if(state->remake.audio_callback) {
-				state->remake.audio_callback(&state->shared, audio_buffer, frames);
+			if(state->remake->audio_callback) {
+				state->remake->audio_callback(&state->shared, audio_buffer, frames);
 			}
 		} break;
 		case LOAD_REMAKE_MODE: {
 			memset(audio_buffer, 0, frames * FRAME_SIZE);
 		}
 		case SELECTOR_MODE: {
-			if(state->selector.audio_callback) {
-				state->selector.audio_callback(&state->shared, audio_buffer, frames);
+			if(state->selector->audio_callback) {
+				state->selector->audio_callback(&state->shared, audio_buffer, frames);
 			}
 		} break;
 		case UNLOAD_REMAKE_MODE: {
@@ -107,13 +107,13 @@ static void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, 
 
 		switch(state->mode) {
 			case REMAKE_MODE: {
-				if(state->remake.audio_callback) {
-					state->remake.audio_callback(&state->shared, (int16_t*)wave_header->lpData, wave_header->dwBufferLength / FRAME_SIZE);
+				if(state->remake->audio_callback) {
+					state->remake->audio_callback(&state->shared, (int16_t*)wave_header->lpData, wave_header->dwBufferLength / FRAME_SIZE);
 				}
 			} break;
 			case SELECTOR_MODE: {
-				if(state->selector.audio_callback) {
-					state->selector.audio_callback(&state->shared, (int16_t*)wave_header->lpData, wave_header->dwBufferLength / FRAME_SIZE);
+				if(state->selector->audio_callback) {
+					state->selector->audio_callback(&state->shared, (int16_t*)wave_header->lpData, wave_header->dwBufferLength / FRAME_SIZE);
 				}
 			} break;
 		}
