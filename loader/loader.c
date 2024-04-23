@@ -18,11 +18,15 @@
  *                    .
  *                        M i n d k i l l e r   S y s t e m s
  *  Version 0.1
+ *
+ *
+ *
+ * “The ships hung in the sky in much the same way that bricks don't.” ― Douglas Adams
+ *
  */
 
-// “The ships hung in the sky in much the same way that bricks don't.” ― Douglas Adams
 
-//  -  - -- --- ---- -----=<{[ includes ]}>=----- ---- --- -- -  -
+//         -  - -- --- ---- -----=<{[ includes ]}>=----- ---- --- -- -  -
 
 #include <stddef.h>
 #include <stdint.h>
@@ -63,7 +67,7 @@
 
 #include "library_loader.c"
 
-// [=]===^=====================================================================================^===[=]
+/* [=]===^=====================================================================================^===[=] */
 // NOTE(peter): We can steal F11 and F12 here, and the shift, ctrl, alt, version of them, they are not on the Amiga keyboard.
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 	static int window_pos[2];
@@ -124,7 +128,7 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 	}
 }
 
-// [=]===^=====================================================================================^===[=]
+/* [=]===^=====================================================================================^===[=] */
 static void framebuffer_callback(GLFWwindow *window, int width, int height) {
 	struct loader_state *state = glfwGetWindowUserPointer(window);
 
@@ -143,7 +147,7 @@ static void framebuffer_callback(GLFWwindow *window, int width, int height) {
 	}
 }
 
-// [=]===^=====================================================================================^===[=]
+/* [=]===^=====================================================================================^===[=] */
 static void mouse_move_callback(GLFWwindow* window, double xpos, double ypos) {
 	struct loader_state *state = glfwGetWindowUserPointer(window);
 
@@ -159,7 +163,7 @@ static void mouse_move_callback(GLFWwindow* window, double xpos, double ypos) {
 	// printf("x: %d  y: %d\n", state->shared.mouse_x, state->shared.mouse_y);
 }
 
-// [=]===^=====================================================================================^===[=]
+/* [=]===^=====================================================================================^===[=] */
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
 	struct loader_state *state = glfwGetWindowUserPointer(window);
 
@@ -177,12 +181,13 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	}
 
 }
-// [=]===^=====================================================================================^===[=]
+
+/* [=]===^=====================================================================================^===[=] */
 static void error_callback(int e, const char *d) {
 	printf("Error %d: %s\n", e, d);
 }
 
-// [=]===^=====================================================================================^===[=]
+/* [=]===^=====================================================================================^===[=] */
 int main(int argc, char **argv) {
 	GLuint shader_program;
 	GLuint vao;

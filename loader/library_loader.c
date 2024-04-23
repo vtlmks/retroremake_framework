@@ -14,84 +14,113 @@
 
 #endif
 
-
-
-
+/* [=]===^=====================================================================================^===[=] */
 // Comparison function for qsort
 static int compare_release_name(const void *a, const void *b) {
-	const struct remake_info *part_a = (const struct remake_info *)a;
-	const struct remake_info *part_b = (const struct remake_info *)b;
+	const struct loader_info *part_a = (const struct loader_info *)a;
+	const struct loader_info *part_b = (const struct loader_info *)b;
 	return strcmp(part_a->release_name, part_b->release_name);
 }
 
+/* [=]===^=====================================================================================^===[=] */
 // Function to sort an array of part_state structs based on release_name
-static void sort_by_release_name(struct remake_info *remakes, size_t num_remakes) {
-	qsort(remakes, num_remakes, sizeof(struct remake_info), compare_release_name);
+static void sort_by_release_name(struct loader_info *remakes, size_t remake_count) {
+	qsort(remakes, remake_count, sizeof(struct remake_info), compare_release_name);
 }
 
+/* [=]===^=====================================================================================^===[=] */
+void load_remakes(struct loader_state *state) {
+	struct dirent *ent;
 
 #ifdef _WIN32
-
-/*
- *  :::       ::: ::::::::::: ::::    ::: :::::::::   ::::::::  :::       :::  ::::::::
- *  :+:       :+:     :+:     :+:+:   :+: :+:    :+: :+:    :+: :+:       :+: :+:    :+:
- *  +:+       +:+     +:+     :+:+:+  +:+ +:+    +:+ +:+    +:+ +:+       +:+ +:+
- *  +#+  +:+  +#+     +#+     +#+ +:+ +#+ +#+    +:+ +#+    +:+ +#+  +:+  +#+ +#++:++#++
- *  +#+ +#+#+ +#+     +#+     +#+  +#+#+# +#+    +#+ +#+    +#+ +#+ +#+#+ +#+        +#+
- *   #+#+# #+#+#      #+#     #+#   #+#+# #+#    #+# #+#    #+#  #+#+# #+#+#  #+#    #+#
- *    ###   ###   ########### ###    #### #########   ########    ###   ###    ########
- */
-
-/*
- * TODO(peter): Fix documentation for this.
- */
-
-void load_remakes(struct loader_state *state) {
+	// Windows-specific variables
 	WIN32_FIND_DATA find_data;
 	HANDLE hFind;
 	char search_path[MAX_PATH];
 
 	snprintf(search_path, sizeof(search_path), "remakes\\remake_*.dll");
 	hFind = FindFirstFile(search_path, &find_data);
-	if(hFind != INVALID_HANDLE_VALUE) {
-		do{
-			state->remake_count++;
-		} while(FindNextFile(hFind, &find_data));
-		FindClose(hFind);
-	}
-
-	// Allocate memory for the remake states
-	state->remakes = (struct loader_info *)calloc(state->remake_count, sizeof(struct loader_info));
-
-	// Load the remakes
-	snprintf(search_path, sizeof(search_path), "remakes\\remake_*.dll");
-	hFind = FindFirstFile(search_path, &find_data);
-	if(hFind != INVALID_HANDLE_VALUE) {
-		int index = 0;
+	if (hFind != INVALID_HANDLE_VALUE) {
 		do {
-			snprintf(state->remakes[index].lib_path, sizeof(state->remakes[index].lib_path), "remakes\\%s", find_data.cFileName);
-			HMODULE handle = LoadLibrary(state->remakes[index].lib_path);
-			if(handle) {
-
-				typedef struct remake_info* (*GetRemakeInfoFunc)();
-				GetRemakeInfoFunc get_remake_info = (GetRemakeInfoFunc)GetProcAddress(handle, "get_remake_information");
-
-				struct remake_info *info = get_remake_info();
-				strcpy_s(state->remakes[index].release_name, 40-1, info->release_name);
-				strcpy_s(state->remakes[index].display_name, 80-1, info->display_name);
-				strcpy_s(state->remakes[index].author_name, 40-1, info->author_name);
-
-				FreeLibrary(handle);
-			}
-			index++;
-		} while(FindNextFile(hFind, &find_data));
+			state->remake_count++;
+		} while (FindNextFile(hFind, &find_data));
 		FindClose(hFind);
-	} else {
-		printf("Failed to open remakes directory.\n");
+
+		// Allocate memory for the remake states
+		state->remakes = (struct loader_info *)calloc(state->remake_count, sizeof(struct loader_info));
+
+		// Load the remakes
+		hFind = FindFirstFile(search_path, &find_data);
+		if (hFind != INVALID_HANDLE_VALUE) {
+			int index = 0;
+			do {
+				snprintf(state->remakes[index].lib_path, sizeof(state->remakes[index].lib_path), "remakes\\%s", find_data.cFileName);
+				HMODULE handle = LoadLibrary(state->remakes[index].lib_path);
+				if (handle) {
+					typedef struct remake_info* (*GetRemakeInfoFunc)();
+					GetRemakeInfoFunc get_remake_info = (GetRemakeInfoFunc)GetProcAddress(handle, "get_remake_information");
+
+					struct remake_info *info = get_remake_info();
+					strcpy_s(state->remakes[index].release_name, 40 - 1, info->release_name);
+					strcpy_s(state->remakes[index].display_name, 80 - 1, info->display_name);
+					strcpy_s(state->remakes[index].author_name, 40 - 1, info->author_name);
+
+					FreeLibrary(handle);
+				}
+				index++;
+			} while (FindNextFile(hFind, &find_data));
+			FindClose(hFind);
+		} else {
+			printf("Failed to open remakes directory.\n");
+		}
 	}
+#elif defined(__linux__)
+	DIR *dir;
+
+	dir = opendir("remakes");
+	if (dir) {
+		// Count the number of files matching the pattern
+		while ((ent = readdir(dir))) {
+			if (fnmatch("remake_*.so", ent->d_name, 0) == 0) {
+				state->remake_count++;
+			}
+		}
+		closedir(dir);
+
+		// Allocate memory for the remake states
+		state->remakes = (struct loader_info *)calloc(state->remake_count, sizeof(struct loader_info));
+
+		// Load the remakes
+		int index = 0;
+		dir = opendir("remakes");
+		if (dir) {
+			while ((ent = readdir(dir))) {
+				if (fnmatch("remake_*.so", ent->d_name, 0) == 0) {
+					snprintf(state->remakes[index].lib_path, sizeof(state->remakes[index].lib_path), "remakes/%s", ent->d_name);
+					void *handle = dlopen(state->remakes[index].lib_path, RTLD_LAZY);
+					if (handle) {
+						struct remake_info *info = dlsym(handle, "remake_information");
+						strlcpy(state->remakes[index].release_name, info->release_name, 40 - 1); // These copies ensure that length does not overflow
+						strlcpy(state->remakes[index].display_name, info->display_name, 80 - 1);
+						strlcpy(state->remakes[index].author_name, info->author_name, 40 - 1);
+
+						dlclose(handle);
+					}
+					index++;
+				}
+			}
+			closedir(dir);
+		} else {
+			printf("Failed to open remakes directory.\n");
+		}
+	}
+#endif
 }
 
+/* [=]===^=====================================================================================^===[=] */
 void load_selector(struct loader_state *state) {
+	char path[256];
+#ifdef _WIN32
 	WIN32_FIND_DATA find_data = {0};
 	HANDLE hFind = 0;
 	char search_path[MAX_PATH] = {0};
@@ -129,14 +158,13 @@ void load_selector(struct loader_state *state) {
 
 	// Load the selected file
 	if(selected_file) {
-		char path[256];
 		snprintf(path, sizeof(path), "remakes\\%s", selected_file);
 		HMODULE handle = LoadLibrary(path);
 		if(handle) {
 			typedef struct selector_info* (*GetSelectorInfoFunc)();
 			GetSelectorInfoFunc get_selector_info = (GetSelectorInfoFunc)GetProcAddress(handle, "get_selector_information");
 
-			state->selector = get_selector_info();	//(struct selector_info *) GetProcAddress(state->remake_handle, "selector_information");
+			state->selector = get_selector_info();
 			// Call the setup function
 			if(state->selector->setup) {
 				state->selector->setup(&state->shared, state->remakes, state->remake_count);
@@ -144,73 +172,7 @@ void load_selector(struct loader_state *state) {
 			free(selected_file);
 		}
 	}
-}
-
-
 #elif defined(__linux__)
-
-/*
- *            :::        ::::::::::: ::::    ::: :::    ::: :::    :::
- *            :+:            :+:     :+:+:   :+: :+:    :+: :+:    :+:
- *            +:+            +:+     :+:+:+  +:+ +:+    +:+  +:+  +:+
- *            +#+            +#+     +#+ +:+ +#+ +#+    +:+   +#++:+
- *            +#+            +#+     +#+  +#+#+# +#+    +#+  +#+  +#+
- *            #+#            #+#     #+#   #+#+# #+#    #+# #+#    #+#
- *            ########## ########### ###    ####  ########  ###    ###
- */
-
-/*
- * Traverses the remakes/ directory and obtains information from every shared library that matches remake_*.so
- */
-static void load_remakes(struct loader_state *state) {
-	DIR *dir;
-	struct dirent *ent;
-	dir = opendir("remakes");
-	if(dir) {
-		// Count the number of files matching the pattern
-		while((ent = readdir(dir))) {
-			if(fnmatch("remake_*.so", ent->d_name, 0) == 0) {
-				state->remake_count++;
-			}
-		}
-		closedir(dir);
-
-		// Allocate memory for the remake states
-		state->remakes = (struct loader_info *)calloc(state->remake_count, sizeof(struct loader_info));
-
-
-		// Load the remakes
-		int index = 0;
-		dir = opendir("remakes");
-		if(dir) {
-			while((ent = readdir(dir))) {
-				if(fnmatch("remake_*.so", ent->d_name, 0) == 0) {
-					snprintf(state->remakes[index].lib_path, sizeof(state->remakes[index].lib_path), "remakes/%s", ent->d_name);
-					void *handle = dlopen(state->remakes[index].lib_path, RTLD_LAZY);
-					if(handle) {
-						struct remake_info *info = dlsym(handle, "remake_information");
-						strlcpy(state->remakes[index].release_name, info->release_name, 40-1);		// These copies makes sure that length does not overflow
-						strlcpy(state->remakes[index].display_name, info->display_name, 80-1);
-						strlcpy(state->remakes[index].author_name, info->author_name, 40-1);
-
-						dlclose(handle);
-					}
-					index++;
-				}
-			}
-			closedir(dir);
-		} else {
-			printf("opendir() error!\n");
-		}
-	} else {
-		printf("opendir() error!\n");
-	}
-}
-
-/*
- *
- */
-static void load_selector(struct loader_state *state) {
 	DIR *dir = 0;
 	struct dirent *ent = 0;
 	int num_files = 0;
@@ -251,27 +213,21 @@ static void load_selector(struct loader_state *state) {
 
 	// Load the selected file
 	if(selected_file) {
-		char path[256];
 		snprintf(path, sizeof(path), "remakes/%s", selected_file);
 		void *handle = dlopen(path, RTLD_LAZY);
 		if(handle) {
 			state->selector = dlsym(handle, "selector_information");
-
-// 			// Call the setup function
+			// Call the setup function
 			if(state->selector->setup) {
 				state->selector->setup(&state->shared, state->remakes, state->remake_count);
 			}
 			free(selected_file);
 		}
 	}
+#endif
 }
 
-
-#endif
-
-/*
- *
- */
+/* [=]===^=====================================================================================^===[=] */
 static void load_remake(struct loader_state *state, uint32_t index) {
 #ifdef _WIN32
 	char search_path[MAX_PATH];
@@ -304,10 +260,7 @@ static void load_remake(struct loader_state *state, uint32_t index) {
 	}
 }
 
-
-/*
- *
- */
+/* [=]===^=====================================================================================^===[=] */
 static void close_remake(struct loader_state *state) {
 	// Close the shared library
 	if(state->remake_handle) {
