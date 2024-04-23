@@ -13,44 +13,30 @@
 #define EXPORT
 #endif
 
-//         the deltamouse stuff + a byte or somesuch with information about buttonstate of mouse
-//         should do something to fetch joypad, to emulate mouse.
-//         we also need to emulate joy on keyboard for people who has no joystick and want to enter
-//         hiddenpart via joystick firebutton
-
-
-
-// TODO(peter): Add more callbacks, mousemove and mousebuttons
-// perhaps instead of having callbacks for mousemove and mousebuttons I add a pointer to a datastructure where I publish data like
-// delta mouse and other information. For delta mouse you need to save the previous value and subtract from the newly read value
-// to get the delta since last read. I might do the same for mousebuttons. The mousebutton bits are set till they are released.
-// This will mean that it's possible to miss mouseclicks that are below 20ms long (1/50th frame).
-
-// Instead of using callbacks for mouse movement and mouse buttons, we could consider adding a pointer to a data structure where
-// we publish information such as delta mouse movements and other relevant data.
-// For calculating delta mouse movements, we'll need to store the previous mouse position and subtract it from the newly read position to get the change since the last read.
-// Similarly, we might apply the same approach for tracking mouse button states. The mouse button bits remain set until they are released.
-// However, it's worth noting that with this approach, there's a possibility of missing mouse clicks that are shorter than 20 milliseconds (1/50th of a frame).
+/*
+ * TODO(peter): joypad, we need to emulate joy on keyboard for people who has no joystick and
+ *              want to enter hiddenpart via joystick firebutton
+ */
 
 /*
  * -=[*]=- part_state struct documentation
- *
  */
 
 struct loader_shared_state {
 	uint32_t *buffer;						// This is the screen, [BUFFER_WIDTH * BUFFER_HEIGHT] in size, RGBA format.
-	void *userdata;						// This can be filled in with a pointer to a struct containing data for the selector/remake.
+	void *remake_userdata;				// This can be filled in with a pointer to a struct containing data for the selector/remake.
+	void *selector_userdata;			// This can be filled in with a pointer to a struct containing data for the selector/remake.
 	char keyboard_state[512];			// You can check in this array what keys are pressed, they are defined below!
 	char mouse_button_state[8];
 	int32_t mouse_x;
 	int32_t mouse_y;
 	int32_t frame_number;
-	bool grab_cursor;
+	bool grab_cursor;						// lock cursor to window.
 };
 
 #define AMIGA_MOUSE_BUTTON_LEFT		0
 #define AMIGA_MOUSE_BUTTON_RIGHT		1
-#define AMIGA_MOUSE_BUTTON_MIDDLE	2
+#define AMIGA_MOUSE_BUTTON_MIDDLE	2	// cant be used, as the main program is set to lock the cursor when pressing middle mouse to make mousemovement work inside demos
 
 #define AMIGA_KEY_SPACE              32
 #define AMIGA_KEY_APOSTROPHE         39  /* ' */

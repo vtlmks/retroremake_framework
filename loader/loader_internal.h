@@ -42,9 +42,9 @@ struct loader_state {
 	uint32_t remake_count;					// Number of remakes
 	bool toggle_crt_emulation;				// Toggle for the shader CRT emulation.
 	struct loader_shared_state shared;	//
-	struct viewport viewport;
-	enum program_mode mode;
-
+	struct viewport viewport;				//
+	enum program_mode mode;					//
+	bool cursor_locked;						// mouse lock state.
 #ifdef _WIN32
 	HMODULE remake_handle;					// Handle to loaded remake
 #elif defined(__linux__)

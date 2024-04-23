@@ -84,7 +84,6 @@ void *get_any_gl_address(const char *name) {
 #define Win32GetOpenGLFunction(Name) opengl->Name = (type_##Name *)get_any_gl_address(#Name)
 
 void gl_init(struct opengl *opengl) {
-	printf("wglGetProcAddress %p\n", wglGetProcAddress);
 	Win32GetOpenGLFunction(glActiveTexture);
 	Win32GetOpenGLFunction(glAttachShader);
 	Win32GetOpenGLFunction(glBindBuffer);

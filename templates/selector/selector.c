@@ -1,13 +1,21 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <loader.h>
 #include <remake.h>
 #include <selector.h>
 
-EXPORT void setup(struct selector_state *state, void *, void *) {
+EXPORT void setup(struct selector_state *state, struct remake_state *remakes, uint32_t remake_count) {
 	strcpy(state->window_title, "First selector - (c)2024 ViTAL - Mindkiller Systems.");
+
+	printf("mo:\n");
+
+	for(uint32_t i = 0; i < remake_count; ++i) {
+		printf("%s\n", remakes[i].release_name);
+	}
 }
 
 EXPORT void cleanup(struct loader_shared_state *state) {
@@ -22,11 +30,9 @@ EXPORT void audio_callback(struct loader_shared_state *state, int16_t *audio_buf
 
 EXPORT int32_t mainloop_callback(struct loader_shared_state *state) {
 	uint32_t *buffer = state->buffer;
-	static uint32_t arr = 0;
 	for(uint32_t i = 0; i < BUFFER_WIDTH * BUFFER_HEIGHT; ++i) {
-		buffer[i] = i*46 + arr;
+		buffer[i] = rand() * rand();
 	}
-	arr += 0x400;
 
 	return 0;
 }

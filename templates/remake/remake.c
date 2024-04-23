@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <loader.h>
 #include <remake.h>
@@ -25,13 +26,10 @@ EXPORT void audio_callback(struct loader_shared_state *state, int16_t *audio_buf
 
 EXPORT int32_t mainloop_callback(struct loader_shared_state *state) {
 	uint32_t *buffer = state->buffer;
-	static uint32_t arr = 0;
 	for(uint32_t i = 0; i < BUFFER_WIDTH * BUFFER_HEIGHT; ++i) {
-		buffer[i] = i*46 - arr;
+		buffer[i] = rand() * rand();
 	}
-	arr -= 0x4;
 
-	printf(".");
 	return 0;
 }
 

@@ -169,6 +169,13 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	} else if(action == GLFW_RELEASE) {
 		state->shared.mouse_button_state[button] = 0;
 	}
+
+	if(button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
+		state->shared.grab_cursor = !state->shared.grab_cursor;
+	// } else if(button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE) {
+	// 	state->shared.mouse_button_state[button] = 0;
+	}
+
 }
 // [=]===^=====================================================================================^===[=]
 static void error_callback(int e, const char *d) {
@@ -313,9 +320,20 @@ int main(int argc, char **argv) {
 			while(running && !glfwWindowShouldClose(window)) {
 				glfwPollEvents();
 
+				// NOTE(peter): this may be temporary, check if we are to exit.
 				if((glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) ||
 					(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)) {
 					glfwSetWindowShouldClose(window, true);
+				}
+
+				// NOTE(peter): Handle grabbing cursor
+				if(state.shared.grab_cursor != state.cursor_locked) {
+					state.cursor_locked = state.shared.grab_cursor;
+					if(state.shared.grab_cursor) {
+						glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+					} else {
+						glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+					}
 				}
 
 				switch(state.mode) {
