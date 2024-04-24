@@ -1,13 +1,13 @@
 ## Retro Remake Framework
 
-This is a cross-platform framework designed for creating retro remakes, which is remakes of demos, cracktros, intros, and more from platforms like Amiga, Atari, C64 and so on.
+This is a cross-platform framework to create retro remakes which is remakes of demos, cracktros, intros, and more from platforms like Amiga, Atari, C64 and so on.
 
 ### Project Structure
 
 The framework generates three distinct types of files:
 
 1. **Loader (`loader` or `loader.exe`):**
-   This component scans the `remakes/` subdirectory and compiles an array of `remakes_*.so/.dll` files. These files are then presented by a randomly selected `selector_*.so/.dll` in a way similar to an old-school demo-disk, where users can select a remake to watch.
+   This component scans the `remakes/` subdirectory and compiles an array of `remakes_*.so/.dll` files. These files are then presented with a randomly selected `selector_*.so/.dll` in a way similar to an old-school demo-disk, where users can select a remake to watch.
 
 ### Getting Started
 
