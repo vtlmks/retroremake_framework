@@ -1,18 +1,3 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-
-#ifdef _WIN32
-#include <windows.h>
-
-#elif defined(__linux__)
-#include <dirent.h>
-#include <dlfcn.h>
-#include <fnmatch.h>
-#include <time.h>
-
-#endif
 
 /* [=]===^=====================================================================================^===[=] */
 // Comparison function for qsort
@@ -138,8 +123,7 @@ void load_selector(struct loader_state *state) {
 
 	// Randomly pick one of the files
 	if(num_files > 0) {
-		srand(time(0));
-		int selected_index = rand() % num_files;
+		int selected_index = mks_rand(num_files);
 
 		// Find the selected file
 		int index = 0;
@@ -191,8 +175,7 @@ void load_selector(struct loader_state *state) {
 
 	// Randomly pick one of the files
 	if(num_files > 0) {
-		srand(time(NULL));
-		int selected_index = rand() % num_files;
+		int selected_index = mks_rand(num_files);
 
 		// Find the selected file
 		int index = 0;

@@ -15,7 +15,7 @@ ctime -end .loader_linux $?
 # Build Windows version
 echo "Building windows version."
 ctime -begin .loader_windows
-x86_64-w64-mingw32-gcc -O2 -march=x86-64-v2 -mtune=native loader.c -o loader -Iinclude -Llib/win32 -l:libglfw3.a -lwinmm -lntdll -lgdi32 -luser32 -lopengl32
+x86_64-w64-mingw32-gcc -O2 -march=x86-64-v2 -mtune=native loader.c -o loader -Iinclude -Llib/win32 -l:libglfw3.a -lwinmm -lntdll -lgdi32 -luser32 -lopengl32 -ladvapi32
 ctime -end .loader_windows $?
 
 [ -e loader ] && mv loader ../bin

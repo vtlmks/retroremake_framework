@@ -33,12 +33,25 @@ EXPORT void audio_callback(struct loader_shared_state *state, int16_t *audio_buf
 	memset(audio_buffer, 0, frames*2*sizeof(int16_t));
 }
 
+/*
+ *  ESCAPE is used globally to exit everything.
+ *
+ *  The returncode from the mainloop tells the loader what remake to load,
+ */
 EXPORT int32_t mainloop_callback(struct loader_shared_state *state) {
 	struct selector *selector = (struct selector *)state->selector_userdata;
 
+	uint32_t mask = 0xffffffff;
+
+	if(state->mouse_button_state[REMAKE_MOUSE_BUTTON_LEFT]) {
+		mask = 0xff00ff00;
+	} else if(state->mouse_button_state[REMAKE_MOUSE_BUTTON_RIGHT]) {
+		mask = 0x00ff00ff;
+	}
+
 	uint32_t *buffer = state->buffer;
 	for(uint32_t i = 0; i < BUFFER_WIDTH * BUFFER_HEIGHT; ++i) {
-		buffer[i] = pcg32_random();
+		buffer[i] = pcg32_random() & mask;
 	}
 
 	return 0;

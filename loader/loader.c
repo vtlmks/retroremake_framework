@@ -38,12 +38,22 @@
 #include <math.h>
 #include <inttypes.h>
 
-#include "glcorearb.h"
-
-#ifdef __linux__
+#ifdef _WIN32
+#include <windows.h>
+#elif defined(__linux__)
+#include <fcntl.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <dlfcn.h>
+#include <fnmatch.h>
+#include <time.h>
 #include <GL/glx.h>
 #endif
+
+#include "glcorearb.h"
+
 #include "opengl.c"
+#include "rand.c"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
