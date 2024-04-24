@@ -1,13 +1,13 @@
 ## Retro Remake Framework
 
-This is a cross-platform framework designed for creating retro remakes, encompassing demos, cracktros, intros, and various nostalgic artifacts from platforms like Amiga, Atari, C64, and more.
+This is a cross-platform framework designed for creating retro remakes, which is remakes of demos, cracktros, intros, and more from platforms like Amiga, Atari, C64 and so on.
 
 ### Project Structure
 
 The framework generates three distinct types of files:
 
 1. **Loader (`loader` or `loader.exe`):**
-   This component scans the `remakes/` subdirectory and compiles an array of `remakes_*.so/.dll` files. These files are then randomly presented by a `selector_*.so/.dll`, mimicking the experience of browsing an old-school demo-disk, where users can select a remake to view.
+   This component scans the `remakes/` subdirectory and compiles an array of `remakes_*.so/.dll` files. These files are then presented by a randomly selected `selector_*.so/.dll` in a way similar to an old-school demo-disk, where users can select a remake to watch.
 
 ### Getting Started
 
@@ -42,9 +42,9 @@ To utilize this project, you will need either a Linux environment or Windows Sub
 
 ### Adding Remakes and Selectors
 
-To contribute a new selector or remake:
+To start writing a new selector or remake:
 
-1. Navigate to the root of the project.
+1. Navigate to the root of the framework.
 
 2. Run either of the following scripts:
    - For a new remake:
@@ -55,9 +55,7 @@ To contribute a new selector or remake:
      ```bash
      ./new_selector.sh <name>
      ```
-
-3. A template will be copied to the respective `remakes/` or `selectors/` subdirectory with the chosen name. Additionally, the `build.sh` script within the corresponding project will be updated to produce a shared library named `remake_<name>.so/.dll` or `selector_<name>.so/.dll`.
-
+A template will be copied to the respective `remakes/` or `selectors/` subdirectory with the chosen name. Additionally, the `build.sh` script within the corresponding project will be updated to produce a shared library named `remake_<name>.so/.dll` or `selector_<name>.so/.dll`.
 
 ## License
 
