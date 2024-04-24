@@ -7,6 +7,9 @@
 #include <loader.h>
 #include <remake.h>
 
+#include "../pcg.c"
+
+
 struct remake  {
 };
 
@@ -27,6 +30,7 @@ EXPORT void key_callback(struct loader_shared_state *state, int key) {
 
 EXPORT void audio_callback(struct loader_shared_state *state, int16_t *audio_buffer, size_t frames) {
 	struct remake *remake = (struct remake *)state->remake_userdata;
+	memset(audio_buffer, 0, frames*2*sizeof(int16_t));
 }
 
 EXPORT int32_t mainloop_callback(struct loader_shared_state *state) {
@@ -34,7 +38,7 @@ EXPORT int32_t mainloop_callback(struct loader_shared_state *state) {
 
 	uint32_t *buffer = state->buffer;
 	for(uint32_t i = 0; i < BUFFER_WIDTH * BUFFER_HEIGHT; ++i) {
-		buffer[i] = rand() * rand();
+		buffer[i] = pcg32_random();
 	}
 
 	return 0;
@@ -52,6 +56,4 @@ struct remake_info remake_information = {
 };
 
 // NOTE(peter): This is only for windows, as it's too lame to be able to getProcessAddress of the struct, like dlsym can on linux.
-EXPORT struct remake_info *get_remake_information() {
-	return &remake_information;
-}
+EXPORT struct remake_info *get_remake_information() { return &remake_information; }

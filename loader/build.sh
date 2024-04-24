@@ -9,7 +9,7 @@ shader2h fragment_shader shader.h fragment_shader.glsl
 # Build Linux version
 echo "Building linux version."
 ctime -begin .loader_linux
-gcc -g -O2 -flto -march=x86-64-v2 -mtune=native loader.c -o loader -Iinclude -Llib/linux64 -lasound -l:libglfw3.a -lm -lGL
+gcc -O2 -flto -march=x86-64-v2 -mtune=native loader.c -o loader -Iinclude -Llib/linux64 -lasound -l:libglfw3.a -lm -lGL
 ctime -end .loader_linux $?
 
 # Build Windows version

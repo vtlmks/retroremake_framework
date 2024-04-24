@@ -8,12 +8,13 @@
 #include <remake.h>
 #include <selector.h>
 
+#include "../pcg.c"
+
 struct selector {
 };
 
 EXPORT void setup(struct loader_shared_state *state, struct loader_info *remakes, uint32_t remake_count) {
 	state->selector_userdata = (struct selector *)calloc(1, sizeof(struct selector));
-
 }
 
 EXPORT void cleanup(struct loader_shared_state *state) {
@@ -37,7 +38,7 @@ EXPORT int32_t mainloop_callback(struct loader_shared_state *state) {
 
 	uint32_t *buffer = state->buffer;
 	for(uint32_t i = 0; i < BUFFER_WIDTH * BUFFER_HEIGHT; ++i) {
-		buffer[i] = rand() * rand();
+		buffer[i] = pcg32_random();
 	}
 
 	return 0;
@@ -53,6 +54,4 @@ EXPORT struct selector_info selector_information = {
 };
 
 // NOTE(peter): This is only for windows, as it's too lame to be able to getProcessAddress of the struct, like dlsym can on linux.
-EXPORT struct selector_info *get_selector_information() {
-	return &selector_information;
-}
+EXPORT struct selector_info *get_selector_information() { return &selector_information; }

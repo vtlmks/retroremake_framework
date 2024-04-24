@@ -80,7 +80,6 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 		state->toggle_crt_emulation = !state->toggle_crt_emulation;
 	}
 
-
 	// NOTE(peter): Toggle fullscreen
 	if(glfwGetKey(window, GLFW_KEY_F12) == GLFW_PRESS) {
 		if(glfwGetWindowMonitor(window) == 0) {
