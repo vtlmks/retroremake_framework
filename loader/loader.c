@@ -204,13 +204,15 @@ int main(int argc, char **argv) {
 	GLuint ebo;
 	GLuint texture;
 	GLFWwindow *window;
+	char window_title[512];
 
 	struct loader_state state = {0};
 	state.toggle_crt_emulation = true;
 
 	load_remakes(&state);
 	load_selector(&state);
-	load_remake(&state, 0);
+
+	load_remake(&state, 0);		// TODO(peter): Remove me, this should be done after the selector has selected a remake, or if the loader was started with an argument to load remake directly
 
 #ifdef _WIN32
 	timeBeginPeriod(1);
@@ -235,6 +237,8 @@ int main(int argc, char **argv) {
 		uint32_t min_window_height = BUFFER_HEIGHT * 2;
 
 		if((window = glfwCreateWindow(scaled_window_width, scaled_window_height, "This will change when remake/selector is loaded", 0, 0))) {
+			snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
+			glfwSetWindowTitle(window, window_title);
 			glfwMakeContextCurrent(window);
 			gl_init(&opengl);
 			glfwSwapInterval(0);																	// NOTE(peter): We handle frame-synchronisation ourself.
@@ -360,7 +364,6 @@ int main(int argc, char **argv) {
 						// load_remake(&state, state->selected_mode);
 // BUG: state.remake.window_title is not filled in, make sure that we call get_information when we load a remake.
 
-						char window_title[512];
 						snprintf(window_title, sizeof(window_title), "%s - %s", state.remakes[0].release_name, "Middle Mouse to release mouse - ESC to Exit");
 						glfwSetWindowTitle(window, window_title);
 						state.mode = REMAKE_MODE;
@@ -371,7 +374,6 @@ int main(int argc, char **argv) {
 						}
 					} break;
 					case UNLOAD_REMAKE_MODE: {
-						char window_title[512];
 						snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
 						state.mode = SELECTOR_MODE;
 					} break;
@@ -420,6 +422,13 @@ int main(int argc, char **argv) {
 				state.shared.frame_number++;
 				// part_state.ms_since_start += (uint32_t)(1000.f / FRAMES_PER_SECOND);
 			}
+
+			glDeleteProgram(shader_program);
+			glDeleteVertexArrays(1, &vao);
+			glDeleteBuffers(1, &vbo);
+			glDeleteBuffers(1, &ebo);
+			glDeleteTextures(1, &texture);
+			free(state.shared.buffer);
 			glfwDestroyWindow(window);
 		} else {
 			printf("ERROR: GLFW could not create window!\n");

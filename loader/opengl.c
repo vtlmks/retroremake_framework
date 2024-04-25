@@ -31,6 +31,11 @@ typedef void type_glUniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2
 typedef void type_glUseProgram(GLuint program);
 typedef void type_glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
 typedef void type_glViewport(GLint x, GLint y, GLsizei width, GLsizei height);
+typedef void type_glDeleteProgram(GLuint program);
+typedef void type_glDeleteVertexArrays(GLsizei n, const GLuint *arrays);
+typedef void type_glDeleteBuffers(GLsizei n, const GLuint *buffers);
+typedef void type_glDeleteTextures(GLsizei n, const GLuint *textures);
+
 
 #define OpenGLFunction(Name) type_##Name *Name
 
@@ -67,6 +72,10 @@ struct opengl {
 	OpenGLFunction(glUseProgram);
 	OpenGLFunction(glVertexAttribPointer);
 	OpenGLFunction(glViewport);
+	OpenGLFunction(glDeleteProgram);
+	OpenGLFunction(glDeleteVertexArrays);
+	OpenGLFunction(glDeleteBuffers);
+	OpenGLFunction(glDeleteTextures);
 };
 struct opengl opengl;
 
@@ -116,6 +125,10 @@ void gl_init(struct opengl *opengl) {
 	Win32GetOpenGLFunction(glUseProgram);
 	Win32GetOpenGLFunction(glVertexAttribPointer);
 	Win32GetOpenGLFunction(glViewport);
+	Win32GetOpenGLFunction(glDeleteProgram);
+	Win32GetOpenGLFunction(glDeleteVertexArrays);
+	Win32GetOpenGLFunction(glDeleteBuffers);
+	Win32GetOpenGLFunction(glDeleteTextures);
 };
 
 #elif defined(__linux__)
@@ -155,6 +168,10 @@ void gl_init(struct opengl *opengl) {
 	LinuxGetOpenGLFunction(glUseProgram);
 	LinuxGetOpenGLFunction(glVertexAttribPointer);
 	LinuxGetOpenGLFunction(glViewport);
+	LinuxGetOpenGLFunction(glDeleteProgram);
+	LinuxGetOpenGLFunction(glDeleteVertexArrays);
+	LinuxGetOpenGLFunction(glDeleteBuffers);
+	LinuxGetOpenGLFunction(glDeleteTextures);
 }
 
 #endif
@@ -191,3 +208,7 @@ void gl_init(struct opengl *opengl) {
 #define glUseProgram						opengl.glUseProgram
 #define glVertexAttribPointer			opengl.glVertexAttribPointer
 #define glViewport						opengl.glViewport
+#define glDeleteProgram					opengl.glDeleteProgram
+#define glDeleteVertexArrays			opengl.glDeleteVertexArrays
+#define glDeleteBuffers					opengl.glDeleteBuffers
+#define glDeleteTextures				opengl.glDeleteTextures
