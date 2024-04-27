@@ -63,41 +63,37 @@ void load_remakes(struct loader_state *state) {
 	DIR *dir;
 
 	dir = opendir("remakes");
-	if (dir) {
+	if(dir) {
 		// Count the number of files matching the pattern
-		while ((ent = readdir(dir))) {
-			if (fnmatch("remake_*.so", ent->d_name, 0) == 0) {
+		while((ent = readdir(dir))) {
+			if(fnmatch("remake_*.so", ent->d_name, 0) == 0) {
 				state->remake_count++;
 			}
 		}
-		closedir(dir);
-
 		// Allocate memory for the remake states
+
 		state->remakes = (struct loader_info *)calloc(state->remake_count, sizeof(struct loader_info));
+		rewinddir(dir);
 
 		// Load the remakes
 		int index = 0;
-		dir = opendir("remakes");
-		if (dir) {
-			while ((ent = readdir(dir))) {
-				if (fnmatch("remake_*.so", ent->d_name, 0) == 0) {
-					snprintf(state->remakes[index].lib_path, sizeof(state->remakes[index].lib_path), "remakes/%s", ent->d_name);
-					void *handle = dlopen(state->remakes[index].lib_path, RTLD_LAZY);
-					if (handle) {
-						struct remake_info *info = dlsym(handle, "remake_information");
-						strlcpy(state->remakes[index].release_name, info->release_name, 40 - 1); // These copies ensure that length does not overflow
-						strlcpy(state->remakes[index].display_name, info->display_name, 80 - 1);
-						strlcpy(state->remakes[index].author_name, info->author_name, 40 - 1);
-
-						dlclose(handle);
-					}
-					index++;
+		while((ent = readdir(dir))) {
+			if(fnmatch("remake_*.so", ent->d_name, 0) == 0) {
+				snprintf(state->remakes[index].lib_path, sizeof(state->remakes[index].lib_path), "remakes/%s", ent->d_name);
+				void *handle = dlopen(state->remakes[index].lib_path, RTLD_LAZY);
+				if(handle) {
+					struct remake_info *info = dlsym(handle, "remake_information");
+					strlcpy(state->remakes[index].release_name, info->release_name, 40 - 1); // These copies ensure that length does not overflow
+					strlcpy(state->remakes[index].display_name, info->display_name, 80 - 1);
+					strlcpy(state->remakes[index].author_name, info->author_name, 40 - 1);
+					dlclose(handle);
 				}
+				index++;
 			}
-			closedir(dir);
-		} else {
-			printf("Failed to open remakes directory.\n");
 		}
+		closedir(dir);
+	} else {
+		printf("Failed to open remakes directory.\n");
 	}
 #endif
 }
@@ -109,21 +105,21 @@ void load_selector(struct loader_state *state) {
 	WIN32_FIND_DATA find_data = {0};
 	HANDLE hFind = 0;
 	char search_path[MAX_PATH] = {0};
-	DWORD num_files = 0;
+	DWORD file_count = 0;
 	char *selected_file = 0;
 
 	snprintf(search_path, sizeof(search_path), "remakes\\selector_*.dll");
 	hFind = FindFirstFile(search_path, &find_data);
 	if(hFind != INVALID_HANDLE_VALUE) {
 		do {
-			num_files++;
+			file_count++;
 		} while(FindNextFile(hFind, &find_data));
 		FindClose(hFind);
 	}
 
 	// Randomly pick one of the files
-	if(num_files > 0) {
-		int selected_index = mks_rand(num_files);
+	if(file_count > 0) {
+		int selected_index = mks_rand(file_count);
 
 		// Find the selected file
 		int index = 0;
@@ -159,7 +155,7 @@ void load_selector(struct loader_state *state) {
 #elif defined(__linux__)
 	DIR *dir = 0;
 	struct dirent *ent = 0;
-	int num_files = 0;
+	int file_count = 0;
 	char *selected_file = 0;
 
 	// Count the number of files matching the pattern
@@ -167,20 +163,16 @@ void load_selector(struct loader_state *state) {
 	if(dir) {
 		while((ent = readdir(dir))) {
 			if(fnmatch("selector_*.so", ent->d_name, 0) == 0) {
-				num_files++;
+				file_count++;
 			}
 		}
-		closedir(dir);
-	}
 
-	// Randomly pick one of the files
-	if(num_files > 0) {
-		int selected_index = mks_rand(num_files);
+		rewinddir(dir);
+		if(file_count > 0) {
+			int selected_index = mks_rand(file_count);
 
-		// Find the selected file
-		int index = 0;
-		dir = opendir("remakes");
-		if(dir) {
+			// Find the selected file
+			int index = 0;
 			while((ent = readdir(dir))) {
 				if(fnmatch("selector_*.so", ent->d_name, 0) == 0) {
 					if(index == selected_index) {
@@ -190,8 +182,8 @@ void load_selector(struct loader_state *state) {
 					index++;
 				}
 			}
-			closedir(dir);
 		}
+		closedir(dir);
 	}
 
 	// Load the selected file
