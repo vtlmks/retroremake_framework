@@ -53,7 +53,7 @@ int16_t alsa_buffer[BUFFER_SIZE];
 
 static void *audio_thread_func(void *arg) {
 	while (1) {
-		snd_pcm_wait(pcm, -1);
+		snd_pcm_wait(pcm, SND_PCM_WAIT_INFINITE);
 		audio_callback(arg, alsa_buffer, BUFFER_SIZE / FRAME_SIZE);
 		snd_pcm_writei(pcm, alsa_buffer, BUFFER_SIZE / FRAME_SIZE);
 		pthread_testcancel();
@@ -63,7 +63,7 @@ static void *audio_thread_func(void *arg) {
 
 static void audio_initialize(struct loader_state *state) {
 	snd_pcm_open(&pcm, "default", SND_PCM_STREAM_PLAYBACK, 0);
-	snd_pcm_set_params(pcm, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, NUM_CHANNELS, SAMPLE_RATE, 1, 20000);	// 20000 is in us, we want 20ms so 20000
+	snd_pcm_set_params(pcm, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, NUM_CHANNELS, SAMPLE_RATE, 1, 20000);	// 20000 is in us, we want 20ms so 20000, not sure how low we can go before breaking things on slow machines.
 	snd_pcm_start(pcm);
 	pthread_create(&audio_thread, 0, audio_thread_func, state);
 }
