@@ -90,91 +90,49 @@ void *get_any_gl_address(const char *name) {
 }
 
 // #define Win32GetOpenGLFunction(Name) opengl->Name = (type_##Name *)wglGetProcAddress(#Name)
-#define Win32GetOpenGLFunction(Name) opengl->Name = (type_##Name *)get_any_gl_address(#Name)
-
-void gl_init(struct opengl *opengl) {
-	Win32GetOpenGLFunction(glActiveTexture);
-	Win32GetOpenGLFunction(glAttachShader);
-	Win32GetOpenGLFunction(glBindBuffer);
-	Win32GetOpenGLFunction(glBindTexture);
-	Win32GetOpenGLFunction(glBindVertexArray);
-	Win32GetOpenGLFunction(glBufferData);
-	Win32GetOpenGLFunction(glClear);
-	Win32GetOpenGLFunction(glClearColor);
-	Win32GetOpenGLFunction(glCompileShader);
-	Win32GetOpenGLFunction(glCreateProgram);
-	Win32GetOpenGLFunction(glCreateShader);
-	Win32GetOpenGLFunction(glDeleteShader);
-	Win32GetOpenGLFunction(glDrawElements);
-	Win32GetOpenGLFunction(glEnableVertexAttribArray);
-	Win32GetOpenGLFunction(glGenBuffers);
-	Win32GetOpenGLFunction(glGenTextures);
-	Win32GetOpenGLFunction(glGenVertexArrays);
-	Win32GetOpenGLFunction(glGetShaderInfoLog);
-	Win32GetOpenGLFunction(glGetShaderiv);
-	Win32GetOpenGLFunction(glGetUniformLocation);
-	Win32GetOpenGLFunction(glLinkProgram);
-	Win32GetOpenGLFunction(glShaderSource);
-	Win32GetOpenGLFunction(glTexImage2D);
-	Win32GetOpenGLFunction(glTexParameteri);
-	Win32GetOpenGLFunction(glTexSubImage2D);
-	Win32GetOpenGLFunction(glUniform1f);
-	Win32GetOpenGLFunction(glUniform1i);
-	Win32GetOpenGLFunction(glUniform2f);
-	Win32GetOpenGLFunction(glUniform4f);
-	Win32GetOpenGLFunction(glUseProgram);
-	Win32GetOpenGLFunction(glVertexAttribPointer);
-	Win32GetOpenGLFunction(glViewport);
-	Win32GetOpenGLFunction(glDeleteProgram);
-	Win32GetOpenGLFunction(glDeleteVertexArrays);
-	Win32GetOpenGLFunction(glDeleteBuffers);
-	Win32GetOpenGLFunction(glDeleteTextures);
-};
-
+#define GetOpenGLFunction(Name) opengl->Name = (type_##Name *)get_any_gl_address(#Name)
 #elif defined(__linux__)
-
-#define LinuxGetOpenGLFunction(Name) opengl->Name = (type_##Name *)glXGetProcAddress((GLubyte *) #Name)
+#define GetOpenGLFunction(Name) opengl->Name = (type_##Name *)glXGetProcAddress((GLubyte *) #Name)
+#endif
 
 void gl_init(struct opengl *opengl) {
-	LinuxGetOpenGLFunction(glActiveTexture);
-	LinuxGetOpenGLFunction(glAttachShader);
-	LinuxGetOpenGLFunction(glBindBuffer);
-	LinuxGetOpenGLFunction(glBindTexture);
-	LinuxGetOpenGLFunction(glBindVertexArray);
-	LinuxGetOpenGLFunction(glBufferData);
-	LinuxGetOpenGLFunction(glClear);
-	LinuxGetOpenGLFunction(glClearColor);
-	LinuxGetOpenGLFunction(glCompileShader);
-	LinuxGetOpenGLFunction(glCreateProgram);
-	LinuxGetOpenGLFunction(glCreateShader);
-	LinuxGetOpenGLFunction(glDeleteShader);
-	LinuxGetOpenGLFunction(glDrawElements);
-	LinuxGetOpenGLFunction(glEnableVertexAttribArray);
-	LinuxGetOpenGLFunction(glGenBuffers);
-	LinuxGetOpenGLFunction(glGenTextures);
-	LinuxGetOpenGLFunction(glGenVertexArrays);
-	LinuxGetOpenGLFunction(glGetShaderInfoLog);
-	LinuxGetOpenGLFunction(glGetShaderiv);
-	LinuxGetOpenGLFunction(glGetUniformLocation);
-	LinuxGetOpenGLFunction(glLinkProgram);
-	LinuxGetOpenGLFunction(glShaderSource);
-	LinuxGetOpenGLFunction(glTexImage2D);
-	LinuxGetOpenGLFunction(glTexParameteri);
-	LinuxGetOpenGLFunction(glTexSubImage2D);
-	LinuxGetOpenGLFunction(glUniform1f);
-	LinuxGetOpenGLFunction(glUniform1i);
-	LinuxGetOpenGLFunction(glUniform2f);
-	LinuxGetOpenGLFunction(glUniform4f);
-	LinuxGetOpenGLFunction(glUseProgram);
-	LinuxGetOpenGLFunction(glVertexAttribPointer);
-	LinuxGetOpenGLFunction(glViewport);
-	LinuxGetOpenGLFunction(glDeleteProgram);
-	LinuxGetOpenGLFunction(glDeleteVertexArrays);
-	LinuxGetOpenGLFunction(glDeleteBuffers);
-	LinuxGetOpenGLFunction(glDeleteTextures);
+	GetOpenGLFunction(glActiveTexture);
+	GetOpenGLFunction(glAttachShader);
+	GetOpenGLFunction(glBindBuffer);
+	GetOpenGLFunction(glBindTexture);
+	GetOpenGLFunction(glBindVertexArray);
+	GetOpenGLFunction(glBufferData);
+	GetOpenGLFunction(glClear);
+	GetOpenGLFunction(glClearColor);
+	GetOpenGLFunction(glCompileShader);
+	GetOpenGLFunction(glCreateProgram);
+	GetOpenGLFunction(glCreateShader);
+	GetOpenGLFunction(glDeleteShader);
+	GetOpenGLFunction(glDrawElements);
+	GetOpenGLFunction(glEnableVertexAttribArray);
+	GetOpenGLFunction(glGenBuffers);
+	GetOpenGLFunction(glGenTextures);
+	GetOpenGLFunction(glGenVertexArrays);
+	GetOpenGLFunction(glGetShaderInfoLog);
+	GetOpenGLFunction(glGetShaderiv);
+	GetOpenGLFunction(glGetUniformLocation);
+	GetOpenGLFunction(glLinkProgram);
+	GetOpenGLFunction(glShaderSource);
+	GetOpenGLFunction(glTexImage2D);
+	GetOpenGLFunction(glTexParameteri);
+	GetOpenGLFunction(glTexSubImage2D);
+	GetOpenGLFunction(glUniform1f);
+	GetOpenGLFunction(glUniform1i);
+	GetOpenGLFunction(glUniform2f);
+	GetOpenGLFunction(glUniform4f);
+	GetOpenGLFunction(glUseProgram);
+	GetOpenGLFunction(glVertexAttribPointer);
+	GetOpenGLFunction(glViewport);
+	GetOpenGLFunction(glDeleteProgram);
+	GetOpenGLFunction(glDeleteVertexArrays);
+	GetOpenGLFunction(glDeleteBuffers);
+	GetOpenGLFunction(glDeleteTextures);
 }
-
-#endif
 
 #define glActiveTexture					opengl.glActiveTexture
 #define glAttachShader					opengl.glAttachShader
