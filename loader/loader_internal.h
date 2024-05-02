@@ -52,3 +52,10 @@ struct loader_state {
 	void *remake_handle;						// handle holding the descriptor returned from dlopen
 #endif
 };
+
+struct debugger_timing {
+	double time_start;
+	double time_end;
+	double time_duration;
+	double time_remaining;
+};

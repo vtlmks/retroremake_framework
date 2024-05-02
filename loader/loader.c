@@ -195,6 +195,21 @@ static void error_callback(int e, const char *d) {
 }
 
 /* [=]===^=====================================================================================^===[=] */
+static void render_debug_bar(struct loader_state *state, struct debugger_timing *dbg) {
+	double bar_length = (state->shared.buffer_height - 10.0) * (1.0 - (dbg->time_duration / FRAME_TIME));
+	uint32_t bar_start_y = (uint32_t)(state->shared.buffer_height - 5) - (uint32_t)bar_length;
+	uint32_t colors[4] = {0x00ff00ff, 0xffff00ff, 0xff0000ff, 0x000000ff};
+
+
+	for (uint32_t y = bar_start_y; y < state->shared.buffer_height - 5; ++y) {
+		uint32_t* row_ptr = state->shared.buffer + y * state->shared.buffer_width + 5;
+		for (uint32_t x = 0; x < 3; ++x) {
+			row_ptr[x] = 0xff0000ff;
+		}
+	}
+}
+
+/* [=]===^=====================================================================================^===[=] */
 void setupTexture(struct loader_state *state, int width, int height) {
 	if(state->texture) {
 		glDeleteTextures(1, &state->texture);
@@ -367,6 +382,10 @@ int main(int argc, char **argv) {
 					}
 				}
 
+				struct debugger_timing dbg_mainloop = {0};
+
+				dbg_mainloop.time_start = glfwGetTime();
+
 				switch(state.mode) {
 					case SELECTOR_MODE: {
 						uint32_t val = state.selector->mainloop_callback(&state.shared);
@@ -399,6 +418,11 @@ int main(int argc, char **argv) {
 						state.mode = SELECTOR_MODE;
 					}
 				}
+
+				dbg_mainloop.time_end = glfwGetTime();
+				dbg_mainloop.time_duration = dbg_mainloop.time_end - dbg_mainloop.time_start;
+				dbg_mainloop.time_remaining = FRAME_TIME - dbg_mainloop.time_duration;
+				render_debug_bar(&state, &dbg_mainloop);
 
 				// NOTE(peter): Rendering stuff
 				glViewport(state.viewport.x, state.viewport.y, state.viewport.w, state.viewport.h);

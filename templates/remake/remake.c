@@ -13,27 +13,27 @@
 struct remake  {
 };
 
-EXPORT void setup(struct loader_shared_state *state) {
+void setup(struct loader_shared_state *state) {
 	state->remake_userdata = (struct remake *)calloc(1, sizeof(struct remake));
 }
 
-EXPORT void cleanup(struct loader_shared_state *state) {
+void cleanup(struct loader_shared_state *state) {
 	struct remake *remake = (struct remake *)state->remake_userdata;
 
 	free(state->remake_userdata);
 	state->remake_userdata = 0;
 }
 
-EXPORT void key_callback(struct loader_shared_state *state, int key) {
+void key_callback(struct loader_shared_state *state, int key) {
 	struct remake *remake = (struct remake *)state->remake_userdata;
 }
 
-EXPORT void audio_callback(struct loader_shared_state *state, int16_t *audio_buffer, size_t frames) {
+void audio_callback(struct loader_shared_state *state, int16_t *audio_buffer, size_t frames) {
 	struct remake *remake = (struct remake *)state->remake_userdata;
 	memset(audio_buffer, 0, frames*2*sizeof(int16_t));
 }
 
-EXPORT int32_t mainloop_callback(struct loader_shared_state *state) {
+int32_t mainloop_callback(struct loader_shared_state *state) {
 	struct remake *remake = (struct remake *)state->remake_userdata;
 
 	uint32_t *buffer = state->buffer;
