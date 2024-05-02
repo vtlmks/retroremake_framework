@@ -59,6 +59,8 @@ EXPORT int32_t mainloop_callback(struct loader_shared_state *state) {
 
 EXPORT struct selector_info selector_information = {
 	.window_title = "window title",
+	.buffer_width = 368,
+	.buffer_height = 276,
 	.setup = setup,
 	.cleanup = cleanup,
 	.key_callback = key_callback,

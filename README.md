@@ -59,7 +59,11 @@ A template will be copied to the respective `remakes/` or `selectors/` subdirect
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Retro Remake Framework is licensed under the MIT License. This means that you are free to use, modify, and distribute the framework for any purpose, including commercial projects, without needing to release your source code. There are no requirements to make your modifications or derived works open-source, and you are not obligated to share your changes with the community unless you choose to do so voluntarily.
+
+The MIT License provides maximum freedom and flexibility, allowing you to use Retro Remake Framework in ways that best suit your needs, without worrying about restrictive licensing terms. Whether you're building personal projects, commercial applications, or contributing to open-source initiatives, Retro Remake Framework is designed to empower developers and encourage collaboration without imposing unnecessary restrictions.
+
+For more details, please refer to the [LICENSE](LICENSE) file included with the framework.
 
 ### MIT License
 

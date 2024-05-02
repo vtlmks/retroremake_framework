@@ -80,7 +80,7 @@ struct opengl {
 struct opengl opengl;
 
 #if defined(_WIN32)
-void *get_any_gl_address(const char *name) {
+static void *get_any_gl_address(const char *name) {
 	void *p = (void *)wglGetProcAddress(name);
 	if(!p) {
 		HMODULE module = LoadLibraryA("opengl32.dll");
@@ -95,7 +95,7 @@ void *get_any_gl_address(const char *name) {
 #define GetOpenGLFunction(Name) opengl->Name = (type_##Name *)glXGetProcAddress((GLubyte *) #Name)
 #endif
 
-void gl_init(struct opengl *opengl) {
+static void gl_init(struct opengl *opengl) {
 	GetOpenGLFunction(glActiveTexture);
 	GetOpenGLFunction(glAttachShader);
 	GetOpenGLFunction(glBindBuffer);

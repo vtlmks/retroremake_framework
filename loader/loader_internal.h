@@ -28,12 +28,12 @@ enum program_mode {
 	SELECTOR_MODE,
 	LOAD_REMAKE_MODE,
 	REMAKE_MODE,
-	UNLOAD_REMAKE_MODE
+	UNLOAD_REMAKE_MODE,
+	LOAD_SELECTOR_MODE
 };
 
 /*
  * -=[*]=- loader_state struct documentation
- *
  */
 struct loader_state {
 	struct selector_info *selector;		// Active selector
@@ -45,6 +45,7 @@ struct loader_state {
 	struct viewport viewport;				//
 	enum program_mode mode;					//
 	bool cursor_locked;						// mouse lock state.
+	GLuint texture;
 #ifdef _WIN32
 	HMODULE remake_handle;					// Handle to loaded remake
 #elif defined(__linux__)

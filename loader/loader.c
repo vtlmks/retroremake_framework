@@ -115,10 +115,8 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 
 	// NOTE(peter): Test code to switch between SELECTOR and a REMAKE, this will stop working when I remove the hardcoded
 	if(action == GLFW_RELEASE) {
-		if(key == GLFW_KEY_2) {
-			state->mode = LOAD_REMAKE_MODE;
-		} else if(key == GLFW_KEY_1) {
-			state->mode = SELECTOR_MODE;
+		if(key == GLFW_KEY_1) {
+			state->mode = UNLOAD_REMAKE_MODE;
 		}
 	}
 
@@ -164,8 +162,8 @@ static void mouse_move_callback(GLFWwindow* window, double xpos, double ypos) {
 	glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
 
 	// Calculate the ratio of window size to buffer size
-	double widthRatio = (double)windowWidth / BUFFER_WIDTH;
-	double heightRatio = (double)windowHeight / BUFFER_HEIGHT;
+	double widthRatio = (double)windowWidth / state->shared.buffer_width;
+	double heightRatio = (double)windowHeight / state->shared.buffer_height;
 
 	state->shared.mouse_x = (int)(xpos / widthRatio);
 	state->shared.mouse_y = (int)(ypos / heightRatio);
@@ -197,12 +195,35 @@ static void error_callback(int e, const char *d) {
 }
 
 /* [=]===^=====================================================================================^===[=] */
+void setupTexture(struct loader_state *state, int width, int height) {
+	if(state->texture) {
+		glDeleteTextures(1, &state->texture);
+	}
+
+	if(state->shared.buffer) {
+		free(state->shared.buffer);
+	}
+
+	state->shared.buffer = malloc(width * height * sizeof(uint32_t));
+	state->shared.buffer_width = width;
+	state->shared.buffer_height = height;
+
+	glGenTextures(1, &state->texture);
+	glBindTexture(GL_TEXTURE_2D, state->texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state->shared.buffer);
+}
+
+
+/* [=]===^=====================================================================================^===[=] */
 int main(int argc, char **argv) {
 	GLuint shader_program;
 	GLuint vao;
 	GLuint vbo;
 	GLuint ebo;
-	GLuint texture;
 	GLFWwindow *window;
 	char window_title[512];
 
@@ -211,8 +232,6 @@ int main(int argc, char **argv) {
 
 	load_remakes(&state);
 	load_selector(&state);
-
-	load_remake(&state, 0);		// TODO(peter): Remove me, this should be done after the selector has selected a remake, or if the loader was started with an argument to load remake directly
 
 #ifdef _WIN32
 	timeBeginPeriod(1);
@@ -230,11 +249,11 @@ int main(int argc, char **argv) {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 //		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);	// NOTE(peter): Only for 3.2+
 
-		uint32_t scaled_window_width = BUFFER_HEIGHT * SCALE * (4.f/3.f);
-		uint32_t scaled_window_height = BUFFER_HEIGHT * SCALE;
+		uint32_t scaled_window_width = 276 * SCALE * (4.f/3.f);
+		uint32_t scaled_window_height = 276 * SCALE;
 
-		uint32_t min_window_width = BUFFER_HEIGHT * 2 * (4.f/3.f);
-		uint32_t min_window_height = BUFFER_HEIGHT * 2;
+		uint32_t min_window_width = 276 * 2 * (4.f/3.f);
+		uint32_t min_window_height = 276 * 2;
 
 		if((window = glfwCreateWindow(scaled_window_width, scaled_window_height, "This will change when remake/selector is loaded", 0, 0))) {
 			snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
@@ -256,12 +275,11 @@ int main(int argc, char **argv) {
 			glfwSetWindowUserPointer(window, &state);
 			glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);		// NOTE(peter): Sticky mouse buttons, so we don't miss any events..
 
-			state.shared.buffer = malloc(BUFFER_WIDTH * BUFFER_HEIGHT * sizeof(uint32_t));
-
 			state.viewport.x = 0;
 			state.viewport.y = 0;
 			state.viewport.w	= scaled_window_width;
 			state.viewport.h = scaled_window_height;
+			state.mode = LOAD_SELECTOR_MODE;
 
 			// Setup Shader
 			GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -313,13 +331,7 @@ int main(int argc, char **argv) {
 			glEnableVertexAttribArray(0);
 			glEnableVertexAttribArray(1);
 
-			glGenTextures(1, &texture);
-			glBindTexture(GL_TEXTURE_2D, texture);                        			 // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  // set texture wrapping to GL_REPEAT (default wrapping method)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, BUFFER_WIDTH, BUFFER_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state.shared.buffer);
+			setupTexture(&state, state.selector->buffer_width, state.selector->buffer_height);
 
 			bool running = true;
 
@@ -335,6 +347,7 @@ int main(int argc, char **argv) {
 
 			double next_update = glfwGetTime() + FRAME_TIME;
 
+			uint32_t remake_index = 0;
 			while(running && !glfwWindowShouldClose(window)) {
 				glfwPollEvents();
 
@@ -356,27 +369,35 @@ int main(int argc, char **argv) {
 
 				switch(state.mode) {
 					case SELECTOR_MODE: {
-						if(state.selector->mainloop_callback) {
-							state.selector->mainloop_callback(&state.shared);
+						uint32_t val = state.selector->mainloop_callback(&state.shared);
+						if(val & 0xff) {
+							state.mode = LOAD_REMAKE_MODE;
+							remake_index = val >> 8;
 						}
 					} break;
-					case LOAD_REMAKE_MODE: {
-						// load_remake(&state, state->selected_mode);
-// BUG: state.remake.window_title is not filled in, make sure that we call get_information when we load a remake.
 
-						snprintf(window_title, sizeof(window_title), "%s - %s", state.remakes[0].release_name, "Middle Mouse to release mouse - ESC to Exit");
+					case LOAD_REMAKE_MODE: {
+						load_remake(&state, remake_index);
+						snprintf(window_title, sizeof(window_title), "%s - %s", state.remakes[remake_index].release_name, "Middle Mouse to release mouse - ESC to Exit");
 						glfwSetWindowTitle(window, window_title);
+						setupTexture(&state, state.remake->buffer_width, state.remake->buffer_height);
 						state.mode = REMAKE_MODE;
 					} break;
 					case REMAKE_MODE: {
-						if(state.remake->mainloop_callback) {
-							state.remake->mainloop_callback(&state.shared);
-						}
+						state.remake->mainloop_callback(&state.shared);
 					} break;
+
 					case UNLOAD_REMAKE_MODE: {
-						snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
-						state.mode = SELECTOR_MODE;
+						close_remake(&state);
+						state.mode = LOAD_SELECTOR_MODE;
 					} break;
+
+					case LOAD_SELECTOR_MODE: {
+						snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
+						setupTexture(&state, state.selector->buffer_width, state.selector->buffer_height);
+						remake_index = 0;
+						state.mode = SELECTOR_MODE;
+					}
 				}
 
 				// NOTE(peter): Rendering stuff
@@ -386,11 +407,11 @@ int main(int argc, char **argv) {
 
 				// These values are set once, move inside the mainloop if you want to vary any one of them.
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, texture);
-				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, BUFFER_WIDTH, BUFFER_HEIGHT, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state.shared.buffer);
+				glBindTexture(GL_TEXTURE_2D, state.texture);
+				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, state.shared.buffer_width, state.shared.buffer_height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state.shared.buffer);
 
 				glUseProgram(shader_program);
-				glUniform2f(uniform_src_image_size, (float)BUFFER_WIDTH, (float)BUFFER_HEIGHT);
+				glUniform2f(uniform_src_image_size, (float)state.shared.buffer_width, (float)state.shared.buffer_height);
 				glUniform2f(uniform_resolution, state.viewport.w, state.viewport.h);
 				glUniform1f(uniform_brightness, brightness);
 				glUniform4f(uniform_tone, tone_dat[0], tone_dat[1], tone_dat[2], tone_dat[3]);
@@ -427,7 +448,7 @@ int main(int argc, char **argv) {
 			glDeleteVertexArrays(1, &vao);
 			glDeleteBuffers(1, &vbo);
 			glDeleteBuffers(1, &ebo);
-			glDeleteTextures(1, &texture);
+			glDeleteTextures(1, &state.texture);
 			free(state.shared.buffer);
 			glfwDestroyWindow(window);
 		} else {

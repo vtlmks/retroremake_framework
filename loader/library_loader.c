@@ -233,6 +233,11 @@ static void load_remake(struct loader_state *state, uint32_t index) {
 	if (state->remake->setup) {
 		state->remake->setup(&state->shared);
 	}
+	if(!state->shared.buffer_width || !state->shared.buffer_height) {
+		state->shared.buffer_width = 368;
+		state->shared.buffer_height = 272;
+	}
+
 }
 
 /* [=]===^=====================================================================================^===[=] */
