@@ -243,10 +243,11 @@ int main(int argc, char **argv) {
 	char window_title[512];
 
 	struct loader_state state = {0};
+	// TODO(peter): Get commandline arguments to see if crt_emulation should be turned off. and other things...
 	state.toggle_crt_emulation = true;
 
-	load_remakes(&state);
-	load_selector(&state);
+	load_remakes(&state);		// Walks through all remakes and extract information about them into an array of loader_info structs
+	load_selector(&state);		// Load a random selector, this will be used for the whole session
 
 #ifdef _WIN32
 	timeBeginPeriod(1);

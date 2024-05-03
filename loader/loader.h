@@ -19,8 +19,6 @@
 /*
  * -=[*]=- part_state struct documentation
  */
-
-
 struct loader_info {
 	char lib_path[256];
 	char release_name[40];
@@ -30,15 +28,15 @@ struct loader_info {
 
 struct loader_shared_state {
 	uint32_t *buffer;						// This is the screen, [BUFFER_WIDTH * BUFFER_HEIGHT] in size, RGBA format.
-	uint32_t buffer_width;				// These are filled in with the resolution you need,
-	uint32_t buffer_height;				// default will be set to 368x272 if they are zero.
 	void *remake_userdata;				// This can be filled in with a pointer to a struct containing data for the selector/remake.
 	void *selector_userdata;			// This can be filled in with a pointer to a struct containing data for the selector/remake.
 	char keyboard_state[512];			// You can check in this array what keys are pressed, they are defined below!
 	char mouse_button_state[8];
+	uint32_t buffer_width;				// These are filled in with the resolution you need,
+	uint32_t buffer_height;				// default will be set to 368x272 if they are zero.
 	int32_t mouse_x;
 	int32_t mouse_y;
-	int32_t frame_number;
+	uint32_t frame_number;
 	bool grab_cursor;						// lock cursor to window.
 };
 
