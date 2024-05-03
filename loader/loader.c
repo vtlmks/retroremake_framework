@@ -368,8 +368,7 @@ int main(int argc, char **argv) {
 				glfwPollEvents();
 
 				// NOTE(peter): this may be temporary, check if we are to exit.
-				if((glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) ||
-					(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)) {
+				if((glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)) {
 					glfwSetWindowShouldClose(window, true);
 				}
 
