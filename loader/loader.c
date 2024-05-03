@@ -52,8 +52,11 @@
 
 #include "glcorearb.h"
 
+// utils.h - xor_rand, mks_rand
+#define UTILS_IMPLEMENTATION 1
+#include "utils.h"
+
 #include "opengl.c"
-#include "rand.c"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -390,6 +393,7 @@ int main(int argc, char **argv) {
 						state.frames_per_second = state.selector->frames_per_second;
 						state.frame_time = 1.0 / state.frames_per_second;
 						remake_index = 0;
+						state.selector->pre_selector_run(&state.shared);
 						state.mode = SELECTOR_MODE;
 					}
 
@@ -416,6 +420,7 @@ int main(int argc, char **argv) {
 					} break;
 
 					case UNLOAD_REMAKE_MODE: {
+						state.remake->cleanup(&state.shared);
 						close_remake(&state);
 						state.mode = LOAD_SELECTOR_MODE;
 					} break;

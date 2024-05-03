@@ -10,7 +10,7 @@ static int compare_release_name(const void *a, const void *b) {
 /* [=]===^=====================================================================================^===[=] */
 // Function to sort an array of part_state structs based on release_name
 static void sort_by_release_name(struct loader_info *remakes, size_t remake_count) {
-	qsort(remakes, remake_count, sizeof(struct remake_info), compare_release_name);
+	qsort(remakes, remake_count, sizeof(struct loader_info), compare_release_name);
 }
 
 /* [=]===^=====================================================================================^===[=] */
@@ -25,10 +25,10 @@ void load_remakes(struct loader_state *state) {
 
 	snprintf(search_path, sizeof(search_path), "remakes\\remake_*.dll");
 	hFind = FindFirstFile(search_path, &find_data);
-	if (hFind != INVALID_HANDLE_VALUE) {
+	if(hFind != INVALID_HANDLE_VALUE) {
 		do {
 			state->remake_count++;
-		} while (FindNextFile(hFind, &find_data));
+		} while(FindNextFile(hFind, &find_data));
 		FindClose(hFind);
 
 		// Allocate memory for the remake states
@@ -36,12 +36,12 @@ void load_remakes(struct loader_state *state) {
 
 		// Load the remakes
 		hFind = FindFirstFile(search_path, &find_data);
-		if (hFind != INVALID_HANDLE_VALUE) {
+		if(hFind != INVALID_HANDLE_VALUE) {
 			int index = 0;
 			do {
 				snprintf(state->remakes[index].lib_path, sizeof(state->remakes[index].lib_path), "remakes\\%s", find_data.cFileName);
 				HMODULE handle = LoadLibrary(state->remakes[index].lib_path);
-				if (handle) {
+				if(handle) {
 					typedef struct remake_info* (*GetRemakeInfoFunc)();
 					GetRemakeInfoFunc get_remake_info = (GetRemakeInfoFunc)GetProcAddress(handle, "get_remake_information");
 
@@ -53,7 +53,7 @@ void load_remakes(struct loader_state *state) {
 					FreeLibrary(handle);
 				}
 				index++;
-			} while (FindNextFile(hFind, &find_data));
+			} while(FindNextFile(hFind, &find_data));
 			FindClose(hFind);
 		} else {
 			printf("Failed to open remakes directory.\n");
@@ -233,7 +233,7 @@ static void load_remake(struct loader_state *state, uint32_t index) {
 	state->remake = dlsym(state->remake_handle, "remake_information");
 #endif
 
-	if (state->remake->setup) {
+	if(state->remake->setup) {
 		state->remake->setup(&state->shared);
 	}
 	if(!state->shared.buffer_width || !state->shared.buffer_height) {
