@@ -196,6 +196,9 @@ void load_selector(struct loader_state *state) {
 			if(state->selector->setup) {
 				state->selector->setup(&state->shared, state->remakes, state->remake_count);
 			}
+			if(!state->selector->frames_per_second) {
+				state->selector->frames_per_second = 50;
+			}
 			free(selected_file);
 		}
 	}
@@ -236,6 +239,9 @@ static void load_remake(struct loader_state *state, uint32_t index) {
 	if(!state->shared.buffer_width || !state->shared.buffer_height) {
 		state->shared.buffer_width = 368;
 		state->shared.buffer_height = 272;
+	}
+	if(!state->remake->frames_per_second) {
+		state->remake->frames_per_second = 50;
 	}
 
 }

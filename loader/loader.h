@@ -2,8 +2,8 @@
 
 // IMPORTANT(peter): DO NOT CHANGE THESE!!!
 //                   There is nothing that checks these values, they are for optimization/convenience only
-#define FRAMES_PER_SECOND 50.0
-#define FRAME_TIME (1.0/FRAMES_PER_SECOND)
+// #define FRAMES_PER_SECOND 50.0
+// #define FRAME_TIME (1.0/FRAMES_PER_SECOND)
 
 #ifdef _WIN32
 #define EXPORT __declspec(dllexport)

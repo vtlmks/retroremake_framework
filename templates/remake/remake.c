@@ -50,6 +50,7 @@ struct remake_info remake_information = {
 	.author_name = "username",
 	.buffer_width = 368,
 	.buffer_height = 276,
+	.frames_per_second = 50,
 	.setup = setup,
 	.cleanup = cleanup,
 	.key_callback = key_callback,

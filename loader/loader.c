@@ -196,10 +196,12 @@ static void error_callback(int e, const char *d) {
 
 /* [=]===^=====================================================================================^===[=] */
 static void render_debug_bar(struct loader_state *state, struct debugger_timing *dbg) {
-	double bar_length = (state->shared.buffer_height - 10.0) * (1.0 - (dbg->time_duration / FRAME_TIME));
+	if(dbg->time_duration > state->frame_time) {
+		dbg->time_duration = state->frame_time;
+	}
+	double bar_length = (state->shared.buffer_height - 10.0) * (1.0 - (dbg->time_duration / state->frame_time));
 	uint32_t bar_start_y = (uint32_t)(state->shared.buffer_height - 5) - (uint32_t)bar_length;
 	uint32_t colors[4] = {0x00ff00ff, 0xffff00ff, 0xff0000ff, 0x000000ff};
-
 
 	for (uint32_t y = bar_start_y; y < state->shared.buffer_height - 5; ++y) {
 		uint32_t* row_ptr = state->shared.buffer + y * state->shared.buffer_width + 5;
@@ -211,13 +213,8 @@ static void render_debug_bar(struct loader_state *state, struct debugger_timing 
 
 /* [=]===^=====================================================================================^===[=] */
 void setupTexture(struct loader_state *state, int width, int height) {
-	if(state->texture) {
-		glDeleteTextures(1, &state->texture);
-	}
-
-	if(state->shared.buffer) {
-		free(state->shared.buffer);
-	}
+	if(state->texture) glDeleteTextures(1, &state->texture);
+	if(state->shared.buffer) free(state->shared.buffer);
 
 	state->shared.buffer = malloc(width * height * sizeof(uint32_t));
 	state->shared.buffer_width = width;
@@ -270,7 +267,7 @@ int main(int argc, char **argv) {
 		uint32_t min_window_width = 276 * 2 * (4.f/3.f);
 		uint32_t min_window_height = 276 * 2;
 
-		if((window = glfwCreateWindow(scaled_window_width, scaled_window_height, "This will change when remake/selector is loaded", 0, 0))) {
+		if((window = glfwCreateWindow(scaled_window_width, scaled_window_height, "Dummy window", 0, 0))) {
 			snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
 			glfwSetWindowTitle(window, window_title);
 			glfwMakeContextCurrent(window);
@@ -360,7 +357,7 @@ int main(int argc, char **argv) {
 			float tone_dat[4] = {0.f};
 			CrtsTone(tone_dat, contrast, saturation, INPUT_THIN, INPUT_MASK);
 
-			double next_update = glfwGetTime() + FRAME_TIME;
+			double next_update = glfwGetTime() + state.frame_time;
 
 			uint32_t remake_index = 0;
 			while(running && !glfwWindowShouldClose(window)) {
@@ -387,11 +384,20 @@ int main(int argc, char **argv) {
 				dbg_mainloop.time_start = glfwGetTime();
 
 				switch(state.mode) {
+					case LOAD_SELECTOR_MODE: {
+						snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
+						setupTexture(&state, state.selector->buffer_width, state.selector->buffer_height);
+						state.frames_per_second = state.selector->frames_per_second;
+						state.frame_time = 1.0 / state.frames_per_second;
+						remake_index = 0;
+						state.mode = SELECTOR_MODE;
+					}
+
 					case SELECTOR_MODE: {
 						uint32_t val = state.selector->mainloop_callback(&state.shared);
 						if(val & 0xff) {
-							state.mode = LOAD_REMAKE_MODE;
 							remake_index = val >> 8;
+							state.mode = LOAD_REMAKE_MODE;
 						}
 					} break;
 
@@ -400,8 +406,11 @@ int main(int argc, char **argv) {
 						snprintf(window_title, sizeof(window_title), "%s - %s", state.remakes[remake_index].release_name, "Middle Mouse to release mouse - ESC to Exit");
 						glfwSetWindowTitle(window, window_title);
 						setupTexture(&state, state.remake->buffer_width, state.remake->buffer_height);
+						state.frames_per_second = state.remake->frames_per_second;
+						state.frame_time = 1.0 / state.frames_per_second;
 						state.mode = REMAKE_MODE;
 					} break;
+
 					case REMAKE_MODE: {
 						state.remake->mainloop_callback(&state.shared);
 					} break;
@@ -410,18 +419,11 @@ int main(int argc, char **argv) {
 						close_remake(&state);
 						state.mode = LOAD_SELECTOR_MODE;
 					} break;
-
-					case LOAD_SELECTOR_MODE: {
-						snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
-						setupTexture(&state, state.selector->buffer_width, state.selector->buffer_height);
-						remake_index = 0;
-						state.mode = SELECTOR_MODE;
-					}
 				}
 
 				dbg_mainloop.time_end = glfwGetTime();
 				dbg_mainloop.time_duration = dbg_mainloop.time_end - dbg_mainloop.time_start;
-				dbg_mainloop.time_remaining = FRAME_TIME - dbg_mainloop.time_duration;
+				dbg_mainloop.time_remaining = state.frame_time - dbg_mainloop.time_duration;
 				render_debug_bar(&state, &dbg_mainloop);
 
 				// NOTE(peter): Rendering stuff
@@ -462,7 +464,7 @@ int main(int argc, char **argv) {
 					}
 					while((next_update - glfwGetTime()) > 0.0) { }			// wait <1ms
 				} else { next_update = glfwGetTime(); }						// We are in the future, next_updates is set to now to not fastforward
-				next_update += FRAME_TIME;
+				next_update += state.frame_time;
 
 				state.shared.frame_number++;
 				// part_state.ms_since_start += (uint32_t)(1000.f / FRAMES_PER_SECOND);

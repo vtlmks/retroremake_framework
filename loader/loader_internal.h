@@ -25,11 +25,11 @@ static const uint32_t indices[] = { 0, 1, 3, 1, 2, 3 };
 struct viewport { float x, y, w, h; };
 
 enum program_mode {
+	LOAD_SELECTOR_MODE,
 	SELECTOR_MODE,
 	LOAD_REMAKE_MODE,
 	REMAKE_MODE,
 	UNLOAD_REMAKE_MODE,
-	LOAD_SELECTOR_MODE
 };
 
 /*
@@ -39,13 +39,15 @@ struct loader_state {
 	struct selector_info *selector;		// Active selector
 	struct remake_info *remake;			// Active remake
 	struct loader_info *remakes;			// Array of loader_info structs, used by the selector to display names of remakes.
-	uint32_t remake_count;					// Number of remakes
-	bool toggle_crt_emulation;				// Toggle for the shader CRT emulation.
 	struct loader_shared_state shared;	//
 	struct viewport viewport;				//
+	double frame_time;
+	uint32_t frames_per_second;
+	uint32_t remake_count;					// Number of remakes
+	GLuint texture;							//
 	enum program_mode mode;					//
+	bool toggle_crt_emulation;				// Toggle for the shader CRT emulation.
 	bool cursor_locked;						// mouse lock state.
-	GLuint texture;
 #ifdef _WIN32
 	HMODULE remake_handle;					// Handle to loaded remake
 #elif defined(__linux__)
