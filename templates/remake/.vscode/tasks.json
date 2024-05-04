@@ -35,7 +35,7 @@
 			"type": "shell",
 			"command": "./loader", // Replace "your_executable" with your actual executable
 			"options": {
-				"cwd": "${workspaceFolder}/../bin" // Set the correct path
+				"cwd": "${workspaceFolder}/../../bin" // Set the correct path
 			},
 			"presentation": {
 				"echo": true,
