@@ -1,6 +1,4 @@
 {
-	// See https://go.microsoft.com/fwlink/?LinkId=733558
-	// for the documentation about the tasks.json format
 	"version": "2.0.0",
 	"tasks": [
 		{
@@ -29,8 +27,25 @@
 				"focus": false,
 				"clear": true,
 				"panel": "shared",
-				"showReuseMessage": false,
+				"showReuseMessage": false
+			}
+		},
+		{
+			"label": "runExecutable",
+			"type": "shell",
+			"command": "./loader", // Replace "your_executable" with your actual executable
+			"options": {
+				"cwd": "${workspaceFolder}/../bin" // Set the correct path
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"clear": true,
+				"panel": "shared",
+				"showReuseMessage": false
 			}
 		}
 	]
 }
+
