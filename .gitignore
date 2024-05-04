@@ -64,9 +64,6 @@ loader/.loader_windows
 include/loader.h
 include/remake.h
 include/selector.h
-include/lz4.h
-include/rle.h
-include/unpack.h
 
 TODO
 directory-structure.txt
