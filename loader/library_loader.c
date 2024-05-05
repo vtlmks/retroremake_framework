@@ -149,11 +149,14 @@ void load_selector(struct loader_state *state) {
 			state->shared.buffer_width = state->selector->buffer_width;
 			state->shared.buffer_height = state->selector->buffer_height;
 
-			state->selector->change_resolution = setup_texture;	// NOTE(peter): It is what it is, not a beautiful solution, but it's working.
+			state->selector->change_resolution = setup_texture;
 			state->selector->private = state;
 
 			if(state->selector->setup) {
 				state->selector->setup(&state->shared, state->remakes, state->remake_count);
+			}
+			if(!state->selector->frames_per_second) {
+				state->selector->frames_per_second = 50;
 			}
 			free(selected_file);
 		}
@@ -202,7 +205,7 @@ void load_selector(struct loader_state *state) {
 			state->shared.buffer_width = state->selector->buffer_width;
 			state->shared.buffer_height = state->selector->buffer_height;
 
-			state->selector->change_resolution = setup_texture;	// NOTE(peter): It is what it is, not a beautiful solution, but it's working.
+			state->selector->change_resolution = setup_texture;
 			state->selector->private = state;
 
 			if(state->selector->setup) {
