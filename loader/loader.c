@@ -78,8 +78,6 @@
 #include "audio.c"
 #include "shader.c"
 
-#include "library_loader.c"
-
 /* [=]===^=====================================================================================^===[=] */
 // NOTE(peter): We can steal F11 and F12 here, and the shift, ctrl, alt, version of them, they are not on the Amiga keyboard.
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -215,7 +213,7 @@ static void render_debug_bar(struct loader_state *state, struct debugger_timing 
 }
 
 /* [=]===^=====================================================================================^===[=] */
-void setupTexture(struct loader_state *state, int width, int height) {
+void setup_texture(struct loader_state *state, int width, int height) {
 	if(state->texture) glDeleteTextures(1, &state->texture);
 	if(state->shared.buffer) free(state->shared.buffer);
 
@@ -232,6 +230,7 @@ void setupTexture(struct loader_state *state, int width, int height) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state->shared.buffer);
 }
 
+#include "library_loader.c"
 
 /* [=]===^=====================================================================================^===[=] */
 int main(int argc, char **argv) {
@@ -247,6 +246,7 @@ int main(int argc, char **argv) {
 	state.toggle_crt_emulation = true;
 
 	load_remakes(&state);		// Walks through all remakes and extract information about them into an array of loader_info structs
+	sort_by_release_name(state.remakes, state.remake_count);
 	load_selector(&state);		// Load a random selector, this will be used for the whole session
 
 #ifdef _WIN32
@@ -347,7 +347,7 @@ int main(int argc, char **argv) {
 			glEnableVertexAttribArray(0);
 			glEnableVertexAttribArray(1);
 
-			setupTexture(&state, state.selector->buffer_width, state.selector->buffer_height);
+			setup_texture(&state, state.selector->buffer_width, state.selector->buffer_height);
 
 			bool running = true;
 
@@ -389,7 +389,7 @@ int main(int argc, char **argv) {
 				switch(state.mode) {
 					case LOAD_SELECTOR_MODE: {
 						snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
-						setupTexture(&state, state.selector->buffer_width, state.selector->buffer_height);
+						setup_texture(&state, state.selector->buffer_width, state.selector->buffer_height);
 						state.frames_per_second = state.selector->frames_per_second;
 						state.frame_time = 1.0 / state.frames_per_second;
 						remake_index = 0;
@@ -409,7 +409,7 @@ int main(int argc, char **argv) {
 						load_remake(&state, remake_index);
 						snprintf(window_title, sizeof(window_title), "%s - %s", state.remakes[remake_index].release_name, "Middle Mouse to release mouse - ESC to Exit");
 						glfwSetWindowTitle(window, window_title);
-						setupTexture(&state, state.remake->buffer_width, state.remake->buffer_height);
+						setup_texture(&state, state.remake->buffer_width, state.remake->buffer_height);
 						state.frames_per_second = state.remake->frames_per_second;
 						state.frame_time = 1.0 / state.frames_per_second;
 						state.mode = REMAKE_MODE;

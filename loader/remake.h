@@ -15,6 +15,8 @@
  *    audio_callback(..) - This will be called when the audio processing stuff needs more audio-samples
  *      key_callback(..) - This is the function that will be called when there are new keypresses to handle, this can be null.
  * mainloop_callback(..) - This will be called 50 times per second, exit by returning non zero
+ *
+ * change_resolution(..) - This pointer is filled in from the loader, and will let the remake/selector change resolution if they want.
  */
 
 struct remake_info {
@@ -26,6 +28,7 @@ struct remake_info {
 	void (*audio_callback)(struct loader_shared_state *state, int16_t *audio_buffer, size_t frames);
 	void (*key_callback)(struct loader_shared_state *state, int key);
 	int32_t (*mainloop_callback)(struct loader_shared_state *state);
+	void (*change_resolution)(uint32_t width, uint32_t height);
 	uint32_t	frames_per_second;
 	uint32_t buffer_width;
 	uint32_t buffer_height;

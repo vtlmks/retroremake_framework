@@ -1,5 +1,13 @@
 #pragma once
 
+#include <stdint.h>
+#include <stdio.h>
+#include <fcntl.h>  // For file I/O
+#include <unistd.h> // For read and close
+#ifdef _WIN32
+#include <windows.h> // For Windows-specific functions
+#endif
+
 struct rng_state { uint32_t x, y, z, w; };
 
 // A Better behaved random number generator, this is slow, not to use in remakes!

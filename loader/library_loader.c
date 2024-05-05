@@ -146,6 +146,12 @@ void load_selector(struct loader_state *state) {
 
 			state->selector = get_selector_info();
 			// Call the setup function
+			state->shared.buffer_width = state->selector->buffer_width;
+			state->shared.buffer_height = state->selector->buffer_height;
+
+			state->selector->change_resolution = setup_texture;	// NOTE(peter): It is what it is, not a beautiful solution, but it's working.
+			state->selector->private = state;
+
 			if(state->selector->setup) {
 				state->selector->setup(&state->shared, state->remakes, state->remake_count);
 			}
@@ -193,6 +199,12 @@ void load_selector(struct loader_state *state) {
 		if(handle) {
 			state->selector = dlsym(handle, "selector_information");
 			// Call the setup function
+			state->shared.buffer_width = state->selector->buffer_width;
+			state->shared.buffer_height = state->selector->buffer_height;
+
+			state->selector->change_resolution = setup_texture;	// NOTE(peter): It is what it is, not a beautiful solution, but it's working.
+			state->selector->private = state;
+
 			if(state->selector->setup) {
 				state->selector->setup(&state->shared, state->remakes, state->remake_count);
 			}
@@ -243,7 +255,6 @@ static void load_remake(struct loader_state *state, uint32_t index) {
 	if(!state->remake->frames_per_second) {
 		state->remake->frames_per_second = 50;
 	}
-
 }
 
 /* [=]===^=====================================================================================^===[=] */
