@@ -3,7 +3,6 @@
 #ifdef _WIN32
 	#include <intrin.h>
 	#include <windows.h>
-	#include <timeapi.h>
 	static void mks_sleep(double time) { Sleep((DWORD)(time*1000)); }
 
 #elif __linux__
