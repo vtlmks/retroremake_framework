@@ -83,9 +83,9 @@ void load_remakes(struct loader_state *state) {
 				void *handle = dlopen(state->remakes[index].lib_path, RTLD_LAZY);
 				if(handle) {
 					struct remake_info *info = dlsym(handle, "remake_information");
-					strlcpy(state->remakes[index].release_name, info->release_name, 40 - 1); // These copies ensure that length does not overflow
-					strlcpy(state->remakes[index].display_name, info->display_name, 80 - 1);
-					strlcpy(state->remakes[index].author_name, info->author_name, 40 - 1);
+					strncpy(state->remakes[index].release_name, info->release_name, 40 - 1); // These copies ensure that length does not overflow
+					strncpy(state->remakes[index].display_name, info->display_name, 80 - 1);
+					strncpy(state->remakes[index].author_name, info->author_name, 40 - 1);
 					dlclose(handle);
 				}
 				index++;

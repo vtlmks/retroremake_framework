@@ -53,7 +53,7 @@ int16_t alsa_buffer[BUFFER_SIZE];
 
 static void *audio_thread_func(void *arg) {
 	while (1) {
-		snd_pcm_wait(pcm, SND_PCM_WAIT_INFINITE);
+		snd_pcm_wait(pcm, -1);
 		audio_callback(arg, alsa_buffer, BUFFER_SIZE / FRAME_SIZE);
 		snd_pcm_writei(pcm, alsa_buffer, BUFFER_SIZE / FRAME_SIZE);
 		pthread_testcancel();
