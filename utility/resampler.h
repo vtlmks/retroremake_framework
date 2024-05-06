@@ -47,5 +47,5 @@ static int16_t *resample_audio(const int8_t *input_audio, size_t input_size, uin
 	return 0;
 }
 
-#endif /* MKS_RESAMPLER_IMPLEMENTATION
+#endif /* MKS_RESAMPLER_IMPLEMENTATION */
 
