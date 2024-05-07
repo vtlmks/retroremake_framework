@@ -24,11 +24,11 @@ static const uint32_t indices[] = { 0, 1, 3, 1, 2, 3 };
 struct viewport { float x, y, w, h; };
 
 enum program_mode {
-	LOAD_SELECTOR_MODE,
-	SELECTOR_MODE,
-	LOAD_REMAKE_MODE,
-	REMAKE_MODE,
-	UNLOAD_REMAKE_MODE,
+	LOAD_SELECTOR_STATE,
+	SELECTOR_STATE,
+	LOAD_REMAKE_STATE,
+	REMAKE_STATE,
+	UNLOAD_REMAKE_STATE,
 };
 
 /*

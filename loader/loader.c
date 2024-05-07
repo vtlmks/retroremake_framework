@@ -117,18 +117,20 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 	// NOTE(peter): Test code to switch between SELECTOR and a REMAKE, this will stop working when I remove the hardcoded
 	if(action == GLFW_RELEASE) {
 		if(key == GLFW_KEY_1) {
-			state->mode = UNLOAD_REMAKE_MODE;
+			if(state->mode == REMAKE_STATE) {
+				state->mode = UNLOAD_REMAKE_STATE;
+			}
 		}
 	}
 
 	// NOTE(peter): Call the key_callback of the selector or remake if it is defined.
 	switch(state->mode) {
-		case REMAKE_MODE: {
+		case REMAKE_STATE: {
 			if(state->remake->key_callback) {
 				state->remake->key_callback(&state->shared, key);
 			}
 		} break;
-		case SELECTOR_MODE: {
+		case SELECTOR_STATE: {
 			if(state->selector->key_callback) {
 				state->selector->key_callback(&state->shared, key);
 			}
@@ -295,7 +297,7 @@ int main(int argc, char **argv) {
 			state.viewport.y = 0;
 			state.viewport.w	= scaled_window_width;
 			state.viewport.h = scaled_window_height;
-			state.mode = LOAD_SELECTOR_MODE;
+			state.mode = LOAD_SELECTOR_STATE;
 
 			// Setup Shader
 			GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -387,42 +389,42 @@ int main(int argc, char **argv) {
 				dbg_mainloop.time_start = glfwGetTime();
 
 				switch(state.mode) {
-					case LOAD_SELECTOR_MODE: {
+					case LOAD_SELECTOR_STATE: {
 						snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
 						setup_texture(&state, state.selector->buffer_width, state.selector->buffer_height);
 						state.frames_per_second = state.selector->frames_per_second;
 						state.frame_time = 1.0 / state.frames_per_second;
 						remake_index = 0;
 						state.selector->pre_selector_run(&state.shared);
-						state.mode = SELECTOR_MODE;
+						state.mode = SELECTOR_STATE;
 					}
 
-					case SELECTOR_MODE: {
+					case SELECTOR_STATE: {
 						uint32_t val = state.selector->mainloop_callback(&state.shared);
 						if(val & 0xff) {
 							remake_index = val >> 8;
-							state.mode = LOAD_REMAKE_MODE;
+							state.mode = LOAD_REMAKE_STATE;
 						}
 					} break;
 
-					case LOAD_REMAKE_MODE: {
+					case LOAD_REMAKE_STATE: {
 						load_remake(&state, remake_index);
 						snprintf(window_title, sizeof(window_title), "%s - %s", state.remakes[remake_index].release_name, "Middle Mouse to release mouse - ESC to Exit");
 						glfwSetWindowTitle(window, window_title);
 						setup_texture(&state, state.remake->buffer_width, state.remake->buffer_height);
 						state.frames_per_second = state.remake->frames_per_second;
 						state.frame_time = 1.0 / state.frames_per_second;
-						state.mode = REMAKE_MODE;
+						state.mode = REMAKE_STATE;
 					} break;
 
-					case REMAKE_MODE: {
+					case REMAKE_STATE: {
 						state.remake->mainloop_callback(&state.shared);
 					} break;
 
-					case UNLOAD_REMAKE_MODE: {
+					case UNLOAD_REMAKE_STATE: {
 						state.remake->cleanup(&state.shared);
 						close_remake(&state);
-						state.mode = LOAD_SELECTOR_MODE;
+						state.mode = LOAD_SELECTOR_STATE;
 					} break;
 				}
 
