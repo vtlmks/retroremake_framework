@@ -22,7 +22,7 @@ build_linux() {
     pushd loader/glfw || { echo "Failed to enter GLFW directory, have you checked out the submodules?"; exit 1; }
     mkdir -p build
     pushd build || { echo "Failed to enter build directory"; exit 1; }
-    cmake .. -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_DOCS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-ffunction-sections -fdata-sections" -DCMAKE_EXE_LINKER_FLAGS="-Wl,--gc-sections"
+    cmake .. -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_DOCS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_X11=ON -DGLFW_BUILD_WAYLAND=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-ffunction-sections -fdata-sections" -DCMAKE_EXE_LINKER_FLAGS="-Wl,--gc-sections"
 
     make -j"$(nproc)" || { echo "Failed to build GLFW for Linux"; exit 1; }
     mv src/*.a "../../lib/linux64" || { echo "Failed to move GLFW library files"; exit 1; }
