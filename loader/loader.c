@@ -38,8 +38,12 @@
 #include <math.h>
 #include <inttypes.h>
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
+#include <malloc.h>  // Include this for _aligned_malloc and _aligned_free on Windows
+#define aligned_alloc(align, size) _aligned_malloc(size, align)
+#define aligned_free _aligned_free
+
 #elif defined(__linux__)
 #include <fcntl.h>
 #include <unistd.h>
@@ -48,6 +52,9 @@
 #include <fnmatch.h>
 #include <time.h>
 #include <GL/glx.h>
+
+#define aligned_free free
+
 #endif
 
 #include "glcorearb.h"
@@ -224,9 +231,9 @@ static void render_debug_bar(struct loader_state *state, struct debugger_timing 
 /* [=]===^=====================================================================================^===[=] */
 void setup_texture(struct loader_state *state, int width, int height) {
 	if(state->texture) glDeleteTextures(1, &state->texture);
-	if(state->shared.buffer) free(state->shared.buffer);
+	if(state->shared.buffer) aligned_free(state->shared.buffer);
 
-	state->shared.buffer = malloc(width * height * sizeof(uint32_t));
+	state->shared.buffer = aligned_alloc(64, width * height * sizeof(uint32_t));
 	state->shared.buffer_width = width;
 	state->shared.buffer_height = height;
 
