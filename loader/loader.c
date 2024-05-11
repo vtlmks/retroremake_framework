@@ -116,7 +116,7 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 
 	// NOTE(peter): Test code to switch between SELECTOR and a REMAKE, this will stop working when I remove the hardcoded
 	if(action == GLFW_RELEASE) {
-		if(key == GLFW_KEY_1) {
+		if(key == GLFW_KEY_F1) {
 			if(state->mode == REMAKE_STATE) {
 				state->mode = UNLOAD_REMAKE_STATE;
 			}
@@ -125,14 +125,14 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 
 	// NOTE(peter): Call the key_callback of the selector or remake if it is defined.
 	switch(state->mode) {
-		case REMAKE_STATE: {
-			if(state->remake->key_callback) {
-				state->remake->key_callback(&state->shared, key);
-			}
-		} break;
 		case SELECTOR_STATE: {
 			if(state->selector->key_callback) {
 				state->selector->key_callback(&state->shared, key);
+			}
+		} break;
+		case REMAKE_STATE: {
+			if(state->remake->key_callback) {
+				state->remake->key_callback(&state->shared, key);
 			}
 		} break;
 	}
