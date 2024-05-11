@@ -48,7 +48,7 @@ static void audio_callback(void *userdata, int16_t *audio_buffer, size_t frames)
 snd_pcm_t *pcm;
 pthread_t audio_thread;
 
-int16_t alsa_buffer[BUFFER_SIZE];
+static int16_t alsa_buffer[BUFFER_SIZE];
 
 static void *audio_thread_func(void *arg) {
 	while (1) {
@@ -95,7 +95,7 @@ static void audio_shutdown() {
 
 HWAVEOUT wave_out;
 WAVEHDR wave_header[BUFFER_COUNT];
-int8_t waveout_buffer[BUFFER_COUNT][BUFFER_SIZE];
+static int8_t waveout_buffer[BUFFER_COUNT][BUFFER_SIZE];
 
 static void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2) {
 	if(uMsg == WOM_DONE) {

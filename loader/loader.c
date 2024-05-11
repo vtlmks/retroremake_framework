@@ -263,6 +263,9 @@ int main(int argc, char **argv) {
 	glfwSetErrorCallback(error_callback);
 
 	if(glfwInit()) {
+		// Set X11 class and instance names before creating the window
+		glfwWindowHintString(GLFW_X11_INSTANCE_NAME, "loader_instance");
+		glfwWindowHintString(GLFW_X11_CLASS_NAME, "loader_class");
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 //		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);	// NOTE(peter): Only for 3.2+
