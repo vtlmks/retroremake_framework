@@ -142,18 +142,25 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 static void framebuffer_callback(GLFWwindow *window, int width, int height) {
 	struct loader_state *state = glfwGetWindowUserPointer(window);
 
-	const float wanted_aspect = 4.f/3.f;
-	float current_aspect = (float)width/(float)height;
+	const float wanted_aspect = 4.f / 3.f;
+	float current_aspect = (float)width / (float)height;
 
+	// Reset viewport dimensions to full window
 	state->viewport.x = 0.0f;
 	state->viewport.y = 0.0f;
 	state->viewport.w = width;
 	state->viewport.h = height;
 
-	if(current_aspect > wanted_aspect) {		// NOTE(peter): If we are fullscreen
-		float new_width = width * (wanted_aspect / current_aspect);
+	if(current_aspect > wanted_aspect) {
+		// Window is wider than the desired aspect ratio
+		float new_width = height * wanted_aspect; // Compute new width based on the height and the desired aspect ratio
 		state->viewport.x = (width - new_width) / 2;
 		state->viewport.w = new_width;
+	} else if(current_aspect < wanted_aspect) {
+		// Window is taller than the desired aspect ratio
+		float new_height = width / wanted_aspect; // Compute new height based on the width and the desired aspect ratio
+		state->viewport.y = (height - new_height) / 2;
+		state->viewport.h = new_height;
 	}
 }
 
