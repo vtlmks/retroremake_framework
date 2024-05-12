@@ -9,15 +9,16 @@
 
 static void audio_callback(void *userdata, int16_t *audio_buffer, size_t frames) {
 	struct loader_state *state = userdata;
+
 	switch(state->mode) {
 		case REMAKE_STATE: {
 			if(state->remake->audio_callback) {
-				state->remake->audio_callback(&state->shared, audio_buffer, frames);
+				state->remake->audio_callback(state->shared.remake_state, audio_buffer, frames);
 			}
 		} break;
 		case SELECTOR_STATE: {
 			if(state->selector->audio_callback) {
-				state->selector->audio_callback(&state->shared, audio_buffer, frames);
+				state->selector->audio_callback(state->shared.selector_state, audio_buffer, frames);
 			}
 		} break;
 		case LOAD_SELECTOR_STATE:

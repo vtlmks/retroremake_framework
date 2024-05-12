@@ -138,12 +138,12 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 	switch(state->mode) {
 		case SELECTOR_STATE: {
 			if(state->selector->key_callback) {
-				state->selector->key_callback(&state->shared, key);
+				state->selector->key_callback(state->shared.selector_state, key);
 			}
 		} break;
 		case REMAKE_STATE: {
 			if(state->remake->key_callback) {
-				state->remake->key_callback(&state->shared, key);
+				state->remake->key_callback(state->shared.remake_state, key);
 			}
 		} break;
 		default: {
@@ -418,12 +418,12 @@ int main(int argc, char **argv) {
 						state.frames_per_second = state.selector->frames_per_second;
 						state.frame_time = 1.0 / state.frames_per_second;
 						remake_index = 0;
-						state.selector->pre_selector_run(&state.shared);
+						state.selector->pre_selector_run(state.shared.selector_state);
 						state.mode = SELECTOR_STATE;
 					}
 
 					case SELECTOR_STATE: {
-						uint32_t val = state.selector->mainloop_callback(&state.shared);
+						uint32_t val = state.selector->mainloop_callback(state.shared.selector_state);
 						if(val & 0xff) {
 							remake_index = val >> 8;
 							state.mode = LOAD_REMAKE_STATE;
@@ -441,7 +441,7 @@ int main(int argc, char **argv) {
 					} break;
 
 					case REMAKE_STATE: {
-						state.remake->mainloop_callback(&state.shared);
+						state.remake->mainloop_callback(state.shared.remake_state);
 					} break;
 
 					case UNLOAD_REMAKE_STATE: {

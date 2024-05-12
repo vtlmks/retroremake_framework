@@ -19,16 +19,20 @@
  * change_resolution(..) - This pointer is filled in from the loader, and will let the remake/selector change resolution if they want.
  */
 
+struct loader_state;
+struct remake_state;
+
 struct remake_info {
 	char *release_name;
 	char *display_name;
 	char *author_name;
 	void (*setup)(struct loader_shared_state *state);
 	void (*cleanup)(struct loader_shared_state *state);
-	void (*audio_callback)(struct loader_shared_state *state, int16_t *audio_buffer, size_t frames);
-	void (*key_callback)(struct loader_shared_state *state, int key);
-	uint32_t (*mainloop_callback)(struct loader_shared_state *state);
-	void (*change_resolution)(uint32_t width, uint32_t height);
+	void (*audio_callback)(struct remake_state *state, int16_t *audio_buffer, size_t frames);
+	void (*key_callback)(struct remake_state *state, int key);
+	uint32_t (*mainloop_callback)(struct remake_state *state);
+	void (*change_resolution)(struct loader_state *state, int width, int height);
+	struct loader_state *private;
 	uint32_t	frames_per_second;
 	uint32_t buffer_width;
 	uint32_t buffer_height;

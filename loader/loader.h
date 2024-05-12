@@ -45,18 +45,18 @@ enum cpu_features {
 };
 
 struct loader_shared_state {
-	uint32_t *buffer;						// This is the screen, [BUFFER_WIDTH * BUFFER_HEIGHT] in size, RGBA format.
-	void *remake_userdata;				// This can be filled in with a pointer to a struct containing data for the selector/remake.
-	void *selector_userdata;			// This can be filled in with a pointer to a struct containing data for the selector/remake.
-	char keyboard_state[512];			// You can check in this array what keys are pressed, they are defined below!
+	uint32_t *buffer;								// This is the screen, [BUFFER_WIDTH * BUFFER_HEIGHT] in size, RGBA format.
+	struct remake_state *remake_state;		// This can be filled in with a pointer to a struct containing data for the selector/remake.
+	struct selector_state *selector_state;	// This can be filled in with a pointer to a struct containing data for the selector/remake.
+	char keyboard_state[512];					// You can check in this array what keys are pressed, they are defined below!
 	char mouse_button_state[8];
 	enum cpu_features cpu_features;
-	uint32_t buffer_width;				// These are filled in with the resolution you need,
-	uint32_t buffer_height;				// default will be set to 368x272 if they are zero.
+	uint32_t buffer_width;						// These are filled in with the resolution you need,
+	uint32_t buffer_height;						// default will be set to 368x272 if they are zero.
 	int32_t mouse_x;
 	int32_t mouse_y;
 	uint32_t frame_number;
-	bool grab_cursor;						// lock cursor to window.
+	bool grab_cursor;								// lock cursor to window.
 };
 
 

@@ -234,6 +234,8 @@ static void load_remake(struct loader_state *state, uint32_t index) {
 	typedef struct remake_info* (*GetRemakeInfoFunc)();
 	GetRemakeInfoFunc get_remake_info = (GetRemakeInfoFunc)GetProcAddress(state->remake_handle, "get_remake_information");
 	state->remake = get_remake_info();
+	state->remake->change_resolution = setup_texture;
+	state->remake->private = state;
 
 #elif defined(__linux__)
 	// Open the shared library
@@ -244,6 +246,8 @@ static void load_remake(struct loader_state *state, uint32_t index) {
 	}
 	state->remake = dlsym(state->remake_handle, "remake_information");
 #endif
+	state->remake->change_resolution = setup_texture;
+	state->remake->private = state;
 
 	if(state->remake->setup) {
 		state->remake->setup(&state->shared);
