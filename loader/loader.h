@@ -20,7 +20,7 @@
  * -=[*]=- part_state struct documentation
  */
 struct loader_info {
-	char lib_path[256];
+	char lib_path[264];
 	char release_name[40];
 	char display_name[80];
 	char author_name[40];

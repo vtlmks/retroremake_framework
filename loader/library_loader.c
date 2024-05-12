@@ -15,8 +15,6 @@ static void sort_by_release_name(struct loader_info *remakes, size_t remake_coun
 
 /* [=]===^=====================================================================================^===[=] */
 void load_remakes(struct loader_state *state) {
-	struct dirent *ent;
-
 #ifdef _WIN32
 	// Windows-specific variables
 	WIN32_FIND_DATA find_data;
@@ -60,6 +58,7 @@ void load_remakes(struct loader_state *state) {
 		}
 	}
 #elif defined(__linux__)
+	struct dirent *ent;
 	DIR *dir;
 
 	dir = opendir("remakes");
@@ -224,8 +223,6 @@ void load_selector(struct loader_state *state) {
 static void load_remake(struct loader_state *state, uint32_t index) {
 #ifdef _WIN32
 	char search_path[MAX_PATH];
-	WIN32_FIND_DATA find_data;
-	HANDLE hFind;
 
 	snprintf(search_path, sizeof(search_path), "%s", state->remakes[index].lib_path);
 	state->remake_handle = LoadLibrary(search_path);

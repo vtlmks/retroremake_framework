@@ -11,7 +11,7 @@
 struct rng_state { uint32_t x, y, z, w; };
 
 // A Better behaved random number generator, this is slow, not to use in remakes!
-uint32_t mks_rand(int max);
+uint32_t mks_rand(uint32_t max);
 
 // Xor-rng good enough random numbers very fast...
 void xor_init_rng(struct rng_state *state, uint32_t seed);
@@ -39,21 +39,21 @@ uint32_t xor_generate_random(struct rng_state *state) {
 /*
  *     A Better behaved random number generator, this is slow, not to use in remakes!
  */
-uint32_t mks_rand(int max) {
+uint32_t mks_rand(uint32_t max) {
 	uint32_t r;
 #ifdef _WIN32
 	HCRYPTPROV hCryptProv;
-	if (CryptAcquireContext(&hCryptProv, 0, "Microsoft Base Cryptographic Provider v1.0", PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
-		if (!CryptGenRandom(hCryptProv, sizeof(r), (BYTE*)&r)) {
+	if(CryptAcquireContext(&hCryptProv, 0, "Microsoft Base Cryptographic Provider v1.0", PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+		if(!CryptGenRandom(hCryptProv, sizeof(r), (BYTE*)&r)) {
 			fprintf(stderr, "Error generating random number on Windows\n");
 			exit(EXIT_FAILURE);
 		}
 		// Always release the context after use
-		if (!CryptReleaseContext(hCryptProv, 0)) {
-			fprintf(stderr, "Failed to release context: %d\n", GetLastError());
+		if(!CryptReleaseContext(hCryptProv, 0)) {
+			fprintf(stderr, "Failed to release context: %ld\n", GetLastError());
 		}
 	} else {
-		fprintf(stderr, "Failed to acquire cryptographic context: %d\n", GetLastError());
+		fprintf(stderr, "Failed to acquire cryptographic context: %ld\n", GetLastError());
 		exit(EXIT_FAILURE);
 	}
 #else

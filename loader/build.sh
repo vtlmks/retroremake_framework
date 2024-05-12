@@ -4,7 +4,7 @@
 INCLUDE_PATHS="-Iinclude -I../include"
 LIBRARY_PATHS_LINUX="-Llib/linux64"
 LIBRARY_PATHS_WINDOWS="-Llib/win32"
-COMMON_CFLAGS="-ffunction-sections -fdata-sections"
+COMMON_CFLAGS="-ffunction-sections -fdata-sections -Wall"
 COMMON_LDFLAGS="-Wl,--gc-sections"
 GLFW_STATIC_LIB_LINUX="-l:libglfw3.a"
 GLFW_STATIC_LIB_WINDOWS="-l:libglfw3.a"

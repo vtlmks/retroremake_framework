@@ -22,7 +22,7 @@ struct selector_info {
 	void (*audio_callback)(struct loader_shared_state *state, int16_t *audio_buffer, size_t frames);
 	void (*key_callback)(struct loader_shared_state *state, int key);
 	void (*pre_selector_run)(struct loader_shared_state *state);
-	int32_t (*mainloop_callback)(struct loader_shared_state *state);
+	uint32_t (*mainloop_callback)(struct loader_shared_state *state);
 	void (*change_resolution)(struct loader_state *state, int width, int height);
 	uint32_t	frames_per_second;
 	uint32_t buffer_width;

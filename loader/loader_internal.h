@@ -12,7 +12,6 @@
 	static void mks_sleep(double time) { usleep((int)(time*1000000)); }
 #endif
 
-static const char* glsl_version = "#version 140";
 static const float vertices[] = {
 	 1.f,-1.f, 0.0f, 1.f, 0.f,
 	 1.f, 1.f, 0.0f, 1.f, 1.f,

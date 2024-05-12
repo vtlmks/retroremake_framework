@@ -35,7 +35,7 @@ typedef void type_glDeleteProgram(GLuint program);
 typedef void type_glDeleteVertexArrays(GLsizei n, const GLuint *arrays);
 typedef void type_glDeleteBuffers(GLsizei n, const GLuint *buffers);
 typedef void type_glDeleteTextures(GLsizei n, const GLuint *textures);
-
+typedef void type_glEnable(GLenum cap);
 
 #define OpenGLFunction(Name) type_##Name *Name
 
@@ -76,6 +76,7 @@ struct opengl {
 	OpenGLFunction(glDeleteVertexArrays);
 	OpenGLFunction(glDeleteBuffers);
 	OpenGLFunction(glDeleteTextures);
+	OpenGLFunction(glEnable);
 };
 struct opengl opengl;
 
@@ -132,7 +133,8 @@ static void gl_init(struct opengl *opengl) {
 	GetOpenGLFunction(glDeleteVertexArrays);
 	GetOpenGLFunction(glDeleteBuffers);
 	GetOpenGLFunction(glDeleteTextures);
-}
+	GetOpenGLFunction(glEnable);
+};
 
 #define glActiveTexture					opengl.glActiveTexture
 #define glAttachShader					opengl.glAttachShader
@@ -170,3 +172,4 @@ static void gl_init(struct opengl *opengl) {
 #define glDeleteVertexArrays			opengl.glDeleteVertexArrays
 #define glDeleteBuffers					opengl.glDeleteBuffers
 #define glDeleteTextures				opengl.glDeleteTextures
+#define glEnable							opengl.glEnable

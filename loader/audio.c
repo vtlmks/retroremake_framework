@@ -121,7 +121,7 @@ static void audio_initialize(struct loader_state *state) {
 
 	for(uint32_t i = 0; i < BUFFER_COUNT; ++i) {
 		memset(&wave_header[i], 0, sizeof(WAVEHDR));
-		wave_header[i].lpData = waveout_buffer[i];
+		wave_header[i].lpData = (char*)waveout_buffer[i];
 		wave_header[i].dwBufferLength = BUFFER_SIZE;
 		waveOutPrepareHeader(wave_out, &wave_header[i], sizeof(WAVEHDR));
 	}

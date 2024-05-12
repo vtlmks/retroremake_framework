@@ -142,6 +142,8 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 				state->remake->key_callback(&state->shared, key);
 			}
 		} break;
+		default: {
+		} break;
 	}
 }
 
@@ -218,7 +220,6 @@ static void render_debug_bar(struct loader_state *state, struct debugger_timing 
 	}
 	double bar_length = (state->shared.buffer_height - 10.0) * (1.0 - (dbg->time_duration / state->frame_time));
 	uint32_t bar_start_y = (uint32_t)(state->shared.buffer_height - 5) - (uint32_t)bar_length;
-	uint32_t colors[4] = {0x00ff00ff, 0xffff00ff, 0xff0000ff, 0x000000ff};
 
 	for (uint32_t y = bar_start_y; y < state->shared.buffer_height - 5; ++y) {
 		uint32_t* row_ptr = state->shared.buffer + y * state->shared.buffer_width + 5;
@@ -343,7 +344,7 @@ int main(int argc, char **argv) {
 			glLinkProgram(shader_program);
 			int uniform_resolution		= glGetUniformLocation(shader_program, "resolution");
 			int uniform_src_image_size	= glGetUniformLocation(shader_program, "src_image_size");
-			int uniform_saturation		= glGetUniformLocation(shader_program, "saturation");
+			// int uniform_saturation		= glGetUniformLocation(shader_program, "saturation");
 			int uniform_brightness		= glGetUniformLocation(shader_program, "brightness");
 			int uniform_tone				= glGetUniformLocation(shader_program, "tone_data");
 			int uniform_crt_emulation	= glGetUniformLocation(shader_program, "crt_emulation");
