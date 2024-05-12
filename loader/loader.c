@@ -82,6 +82,10 @@
 
 #include "loader_internal.h"
 
+// get cpu capabilities
+#include "cpu.c"
+
+
 #include "audio.c"
 #include "shader.c"
 
@@ -262,6 +266,7 @@ int main(int argc, char **argv) {
 	// TODO(peter): Get commandline arguments to see if crt_emulation should be turned off. and other things...
 	state.toggle_crt_emulation = true;
 
+	check_cpu_features(&state);
 	load_remakes(&state);		// Walks through all remakes and extract information about them into an array of loader_info structs
 	sort_by_release_name(state.remakes, state.remake_count);
 	load_selector(&state);		// Load a random selector, this will be used for the whole session

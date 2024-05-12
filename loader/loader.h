@@ -26,12 +26,31 @@ struct loader_info {
 	char author_name[40];
 };
 
+
+enum cpu_features {
+	REMAKE_CPU_SSE = 0x0001,
+	REMAKE_CPU_SSE2 = 0x0002,
+	REMAKE_CPU_SSE3 = 0x0004,
+	REMAKE_CPU_SSSE3 = 0x0008,
+	REMAKE_CPU_SSE4_1 = 0x0010,
+	REMAKE_CPU_SSE4_2 = 0x0020,
+	REMAKE_CPU_AVX = 0x0040,
+	REMAKE_CPU_AVX2 = 0x0080,
+	REMAKE_CPU_FMA = 0x0100,
+	REMAKE_CPU_BMI1 = 0x0200,
+	REMAKE_CPU_BMI2 = 0x0400,
+	REMAKE_CPU_AES = 0x0800,
+	REMAKE_CPU_AVX512F = 0x1000,
+	REMAKE_CPU_SHA = 0x2000
+};
+
 struct loader_shared_state {
 	uint32_t *buffer;						// This is the screen, [BUFFER_WIDTH * BUFFER_HEIGHT] in size, RGBA format.
 	void *remake_userdata;				// This can be filled in with a pointer to a struct containing data for the selector/remake.
 	void *selector_userdata;			// This can be filled in with a pointer to a struct containing data for the selector/remake.
 	char keyboard_state[512];			// You can check in this array what keys are pressed, they are defined below!
 	char mouse_button_state[8];
+	enum cpu_features cpu_features;
 	uint32_t buffer_width;				// These are filled in with the resolution you need,
 	uint32_t buffer_height;				// default will be set to 368x272 if they are zero.
 	int32_t mouse_x;
@@ -39,6 +58,7 @@ struct loader_shared_state {
 	uint32_t frame_number;
 	bool grab_cursor;						// lock cursor to window.
 };
+
 
 #define REMAKE_MOUSE_BUTTON_LEFT		0
 #define REMAKE_MOUSE_BUTTON_RIGHT		1
