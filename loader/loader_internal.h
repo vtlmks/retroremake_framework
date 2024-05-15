@@ -12,11 +12,18 @@
 	static void mks_sleep(double time) { usleep((int)(time*1000000)); }
 #endif
 
+// static const float vertices[] = {
+// 	 1.f,-1.f, 0.0f, 1.f, 0.f,
+// 	 1.f, 1.f, 0.0f, 1.f, 1.f,
+// 	-1.f, 1.f, 0.0f, 0.f, 1.f,
+// 	-1.f,-1.f, 0.0f, 0.f, 0.f
+// };
+
 static const float vertices[] = {
-	 1.f,-1.f, 0.0f, 1.f, 0.f,
-	 1.f, 1.f, 0.0f, 1.f, 1.f,
-	-1.f, 1.f, 0.0f, 0.f, 1.f,
-	-1.f,-1.f, 0.0f, 0.f, 0.f
+	 1.f,-1.f, 1.f, 0.f,
+	 1.f, 1.f, 1.f, 1.f,
+	-1.f, 1.f, 0.f, 1.f,
+	-1.f,-1.f, 0.f, 0.f
 };
 static const uint32_t indices[] = { 0, 1, 3, 1, 2, 3 };
 
