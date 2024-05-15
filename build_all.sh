@@ -6,7 +6,8 @@ build_shared_libraries() {
     if [ -d "$dir" ]; then
         for script in "$dir"/*/build.sh; do
             if [ -f "$script" ]; then
-                echo "Building shared library in $script"
+                dir_name=$(basename "$(dirname "$script")")
+                echo " - Building $dir_name"
                 (cd "$(dirname "$script")" && ./build.sh)
             fi
         done
@@ -14,16 +15,23 @@ build_shared_libraries() {
 }
 
 # Build remakes
-echo "Building remakes..."
+echo ""
+echo "~~~ Building remakes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo ""
 build_shared_libraries "remakes"
 
 # Build selectors
-echo "Building selectors..."
+echo ""
+echo "~~~ Building selectors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo ""
 build_shared_libraries "selectors"
 
 # Build loader
-echo "Building loader..."
+echo ""
+echo "~~~ Building loader ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo ""
 (cd "loader" && ./build.sh)
 
+echo ""
 echo "Build process completed."
 
