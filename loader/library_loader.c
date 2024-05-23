@@ -218,13 +218,10 @@ void load_selector(struct loader_state *state) {
 		snprintf(path, sizeof(path), "remakes/%s", selected_file);
 		void *handle = library_open(path);
 		if(handle) {
-// #ifdef _WIN32
 			typedef struct selector_info* (*GetSelectorInfoFunc)();
 			GetSelectorInfoFunc get_selector_info = (GetSelectorInfoFunc)library_get_symbol(handle, "get_selector_information");
 			state->selector = get_selector_info();
-// #else
-// 			state->selector = library_get_symbol(handle, "selector_information");
-// #endif
+
 			state->shared.buffer_width = state->selector->buffer_width;
 			state->shared.buffer_height = state->selector->buffer_height;
 			state->selector->change_resolution = setup_texture;
@@ -248,13 +245,9 @@ void load_remake(struct loader_state *state, uint32_t index) {
 		fprintf(stderr, "Error: Unable to load remake.\n");
 		exit(EXIT_FAILURE);
 	}
-// #ifdef _WIN32
 	typedef struct remake_info* (*GetRemakeInfoFunc)();
 	GetRemakeInfoFunc get_remake_info = (GetRemakeInfoFunc)library_get_symbol(state->remake_handle, "get_remake_information");
 	state->remake = get_remake_info();
-// #else
-// 	state->remake = library_get_symbol(state->remake_handle, "remake_information");
-// #endif
 
 	state->remake->change_resolution = setup_texture;
 	state->remake->private = state;
