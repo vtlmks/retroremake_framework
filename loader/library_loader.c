@@ -6,7 +6,6 @@ static int match(char *start, char *end, const char *filename) {
 	return !(strncmp(filename, start, strlen(start)) == 0 && strstr(filename, end) != 0);
 }
 
-
 typedef struct directory_handle directory_handle;
 
 #ifdef _WIN32
@@ -46,7 +45,7 @@ static directory_handle *open_directory(const char *path) {
 	handle->first_entry = 1;
 	if(handle->hFind == INVALID_HANDLE_VALUE) {
 		free(handle);
-		return NULL;
+		return 0;
 	}
 	return handle;
 }
@@ -61,7 +60,7 @@ static void close_directory(directory_handle *handle) {
 }
 
 static const char *read_next_file(directory_handle *handle) {
-	if(!handle) return NULL;
+	if(!handle) return 0;
 	if(handle->first_entry) {
 		handle->first_entry = 0;
 		return handle->find_data.cFileName;
@@ -69,7 +68,7 @@ static const char *read_next_file(directory_handle *handle) {
 	if(FindNextFile(handle->hFind, &handle->find_data)) {
 		return handle->find_data.cFileName;
 	}
-	return NULL;
+	return 0;
 }
 
 #else
@@ -97,11 +96,11 @@ struct directory_handle {
 
 static directory_handle *open_directory(const char *path) {
 	directory_handle *handle = malloc(sizeof(directory_handle));
-	if(!handle) return NULL;
+	if(!handle) return 0;
 	handle->dir = opendir(path);
 	if(!handle->dir) {
 		free(handle);
-		return NULL;
+		return 0;
 	}
 	strncpy(handle->path, path, sizeof(handle->path));
 	return handle;
@@ -117,12 +116,12 @@ static void close_directory(directory_handle *handle) {
 }
 
 static const char *read_next_file(directory_handle *handle) {
-	if(!handle || !handle->dir) return NULL;
+	if(!handle || !handle->dir) return 0;
 	handle->entry = readdir(handle->dir);
 	if(handle->entry) {
 		return handle->entry->d_name;
 	}
-	return NULL;
+	return 0;
 }
 #endif
 
@@ -141,7 +140,8 @@ static void sort_by_release_name(struct loader_info *remakes, size_t remake_coun
 }
 
 /* [=]===^=====================================================================================^===[=] */
-void load_remakes(struct loader_state *state) {
+static void load_remakes(struct loader_state *state) {
+
 	directory_handle *dir = open_directory("remakes");
 	if(dir) {
 		const char *filename;
@@ -178,10 +178,10 @@ void load_remakes(struct loader_state *state) {
 }
 
 /* [=]===^=====================================================================================^===[=] */
-void load_selector(struct loader_state *state) {
+static void load_selector(struct loader_state *state) {
 	const char *filename;
-	int file_count = 0;
-	char *selected_file = NULL;
+	uint32_t file_count = 0;
+	char *selected_file = 0;
 	char path[256];
 
 	directory_handle *dir = open_directory("remakes");
@@ -193,7 +193,7 @@ void load_selector(struct loader_state *state) {
 		}
 		close_directory(dir);
 
-		if(file_count > 0) {
+		if(file_count) {
 			int selected_index = mks_rand(file_count);
 			int index = 0;
 			dir = open_directory("remakes");
@@ -235,8 +235,10 @@ void load_selector(struct loader_state *state) {
 }
 
 /* [=]===^=====================================================================================^===[=] */
-void load_remake(struct loader_state *state, uint32_t index) {
+static void load_remake(struct loader_state *state, uint32_t index) {
+
 	state->remake_handle = library_open(state->remakes[index].lib_path);
+
 	if(!state->remake_handle) {
 		fprintf(stderr, "Error: Unable to load remake.\n");
 		exit(EXIT_FAILURE);
@@ -260,9 +262,9 @@ void load_remake(struct loader_state *state, uint32_t index) {
 	}
 }
 
-void close_remake(struct loader_state *state) {
+static void close_remake(struct loader_state *state) {
 	if(state->remake_handle) {
 		library_close(state->remake_handle);
-		state->remake_handle = NULL;
+		state->remake_handle = 0;
 	}
 }
