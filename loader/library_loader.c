@@ -160,13 +160,9 @@ void load_remakes(struct loader_state *state) {
 				snprintf(state->remakes[index].lib_path, sizeof(state->remakes[index].lib_path), "remakes/%s", filename);
 				void *handle = library_open(state->remakes[index].lib_path);
 				if(handle) {
-#ifdef _WIN32
 					typedef struct remake_info* (*GetRemakeInfoFunc)();
 					GetRemakeInfoFunc get_remake_info = (GetRemakeInfoFunc)library_get_symbol(handle, "get_remake_information");
 					struct remake_info *info = get_remake_info();
-#else
-					struct remake_info *info = library_get_symbol(handle, "remake_information");
-#endif
 					strlcpy(state->remakes[index].release_name, info->release_name, sizeof(state->remakes[index].release_name));
 					strlcpy(state->remakes[index].display_name, info->display_name, sizeof(state->remakes[index].display_name));
 					strlcpy(state->remakes[index].author_name, info->author_name, sizeof(state->remakes[index].author_name));
