@@ -91,7 +91,7 @@
 
 /* [=]===^=====================================================================================^===[=] */
 // NOTE(peter): We can steal F11 and F12 here, and the shift, ctrl, alt, version of them, they are not on the Amiga keyboard.
-static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 	static int window_pos[2];
 	static int window_size[2];
 
@@ -125,7 +125,7 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 		state->shared.keyboard_state[key] = 0;
 	}
 
-	// NOTE(peter): Test code to switch between SELECTOR and a REMAKE, this will stop working when I remove the hardcoded
+	// NOTE(peter): Test code to go back to the selector.
 	if(action == GLFW_RELEASE) {
 		if(key == GLFW_KEY_F1) {
 			if(state->mode == REMAKE_STATE) {

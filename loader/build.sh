@@ -48,7 +48,7 @@ ctime -end .loader_linux $?
 echo "Building windows version."
 
 ctime -begin .loader_windows
-x86_64-w64-mingw32-gcc -O2 $COMMON_CFLAGS loader.c -o loader $INCLUDE_PATHS $LIBRARY_PATHS_WINDOWS $GLFW_STATIC_LIB_WINDOWS -lwinmm -lntdll -lgdi32 -luser32 -lopengl32 -ladvapi32
+x86_64-w64-mingw32-gcc -g -O0 $COMMON_CFLAGS loader.c -o loader $INCLUDE_PATHS $LIBRARY_PATHS_WINDOWS $GLFW_STATIC_LIB_WINDOWS -lwinmm -lntdll -lgdi32 -luser32 -lopengl32 -ladvapi32
 ctime -end .loader_windows $?
 
 # Post-build tasks

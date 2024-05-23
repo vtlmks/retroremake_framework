@@ -44,11 +44,12 @@ static void audio_callback(void *userdata, int16_t *audio_buffer, size_t frames)
 #include <pthread.h>
 #include <alsa/asoundlib.h>
 
+
 #define BUFFER_SIZE (512 * FRAME_SIZE)
+#define NUM_CHANNELS 2
 
 snd_pcm_t *pcm;
 pthread_t audio_thread;
-
 static int16_t alsa_buffer[BUFFER_SIZE];
 
 static void *audio_thread_func(void *arg) {
@@ -61,16 +62,57 @@ static void *audio_thread_func(void *arg) {
 	return 0;
 }
 
+static int set_hw_params(snd_pcm_t *handle) {
+	snd_pcm_hw_params_t *params;
+	snd_pcm_uframes_t period_size = 128;  // Period size (frames)
+	snd_pcm_uframes_t buffer_size = 512;  // Buffer size (frames)
+	unsigned int rate = SAMPLE_RATE;
+	int err;
+
+	snd_pcm_hw_params_alloca(&params);
+	err = snd_pcm_hw_params_any(handle, params);
+	if(err < 0) { fprintf(stderr, "Cannot initialize hardware parameter structure (%s)\n", snd_strerror(err)); return err; }
+
+	err = snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
+	if(err < 0) { fprintf(stderr, "Cannot set access type (%s)\n", snd_strerror(err)); return err; }
+	err = snd_pcm_hw_params_set_format(handle, params, SND_PCM_FORMAT_S16_LE);
+	if(err < 0) { fprintf(stderr, "Cannot set sample format (%s)\n", snd_strerror(err)); return err; }
+
+	err = snd_pcm_hw_params_set_channels(handle, params, NUM_CHANNELS);
+	if(err < 0) { fprintf(stderr, "Cannot set channel count (%s)\n", snd_strerror(err)); return err; }
+
+	err = snd_pcm_hw_params_set_rate_near(handle, params, &rate, 0);
+	if(err < 0) { fprintf(stderr, "Cannot set sample rate (%s)\n", snd_strerror(err)); return err; }
+
+	err = snd_pcm_hw_params_set_period_size_near(handle, params, &period_size, 0);
+	if(err < 0) { fprintf(stderr, "Cannot set period size (%s)\n", snd_strerror(err)); return err; }
+
+	err = snd_pcm_hw_params_set_buffer_size_near(handle, params, &buffer_size);
+	if(err < 0) { fprintf(stderr, "Cannot set buffer size (%s)\n", snd_strerror(err)); return err; }
+
+	err = snd_pcm_hw_params(handle, params);
+	if(err < 0) { fprintf(stderr, "Cannot set parameters (%s)\n", snd_strerror(err)); return err; }
+
+	return 0;
+}
+
 static void audio_initialize(struct loader_state *state) {
-	snd_pcm_open(&pcm, "default", SND_PCM_STREAM_PLAYBACK, 0);
-	snd_pcm_set_params(pcm, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, NUM_CHANNELS, SAMPLE_RATE, 1, 20000);	// 20000 is in us, we want 20ms so 20000, not sure how low we can go before breaking things on slow machines.
-	snd_pcm_start(pcm);
-	pthread_create(&audio_thread, 0, audio_thread_func, state);
+	int err;
+	err = snd_pcm_open(&pcm, "default", SND_PCM_STREAM_PLAYBACK, 0);
+	if(err < 0) { fprintf(stderr, "Error opening PCM device: %s\n", snd_strerror(err)); return; }
+
+	err = set_hw_params(pcm);
+	if(err < 0) { fprintf(stderr, "Error setting hardware parameters: %s\n", snd_strerror(err)); return; }
+
+	err = snd_pcm_start(pcm);
+	if(err < 0) { fprintf(stderr, "Error starting PCM device: %s\n", snd_strerror(err)); return; }
+
+	pthread_create(&audio_thread, NULL, audio_thread_func, state);
 }
 
 static void audio_shutdown() {
 	pthread_cancel(audio_thread);
-	pthread_join(audio_thread, 0);
+	pthread_join(audio_thread, NULL);
 	snd_pcm_drop(pcm);
 	snd_pcm_close(pcm);
 }

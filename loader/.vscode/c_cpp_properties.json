@@ -3,8 +3,8 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**",
-                "/usr/include",
+                "${workspaceFolder}/../**",
+                "/usr/include"
             ],
             "defines": [],
 				"cStandard": "c17",
@@ -13,9 +13,9 @@
             "intelliSenseMode": "gcc-x64",
             "browse": {
                 "path": [
-                    "${workspaceFolder}"
+                    "${workspaceFolder}/**",
                 ],
-                "limitSymbolsToIncludedHeaders": true,
+                "limitSymbolsToIncludedHeaders": false,
                 "databaseFilename": ""
             }
         }
