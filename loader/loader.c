@@ -251,6 +251,13 @@ void setup_texture(struct loader_state *state, int width, int height) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state->shared.buffer);
 }
 
+void change_resolution(struct loader_state *state, int width, int height) {
+	if(state->shared.buffer_width != width || state->shared.buffer_height != height) {
+		setup_texture(state, width, height);
+	}
+}
+
+
 #include "library_loader.c"
 
 /* [=]===^=====================================================================================^===[=] */
@@ -414,7 +421,7 @@ int main(int argc, char **argv) {
 				switch(state.mode) {
 					case LOAD_SELECTOR_STATE: {
 						snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
-						setup_texture(&state, state.selector->buffer_width, state.selector->buffer_height);
+						change_resolution(&state, state.selector->buffer_width, state.selector->buffer_height);
 						state.frames_per_second = state.selector->frames_per_second;
 						state.frame_time = 1.0 / state.frames_per_second;
 						remake_index = 0;
@@ -434,7 +441,7 @@ int main(int argc, char **argv) {
 						load_remake(&state, remake_index);
 						snprintf(window_title, sizeof(window_title), "%s - %s", state.remakes[remake_index].release_name, "Middle Mouse to release mouse - ESC to Exit");
 						glfwSetWindowTitle(window, window_title);
-						setup_texture(&state, state.remake->buffer_width, state.remake->buffer_height);
+						change_resolution(&state, state.remake->buffer_width, state.remake->buffer_height);
 						state.frames_per_second = state.remake->frames_per_second;
 						state.frame_time = 1.0 / state.frames_per_second;
 						state.mode = REMAKE_STATE;

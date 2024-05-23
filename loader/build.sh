@@ -41,7 +41,7 @@ setup_pkg_config
 # Build Linux version
 echo "Building linux version."
 ctime -begin .loader_linux
-gcc -O2 $COMMON_CFLAGS $CFLAGS -o loader loader.c $COMMON_LDFLAGS $LDFLAGS $INCLUDE_PATHS $LIBRARY_PATHS_LINUX $GLFW_STATIC_LIB_LINUX -lm -ldl -pthread
+gcc -g -O0 $COMMON_CFLAGS $CFLAGS -o loader loader.c $COMMON_LDFLAGS $LDFLAGS $INCLUDE_PATHS $LIBRARY_PATHS_LINUX $GLFW_STATIC_LIB_LINUX -lm -ldl -pthread
 ctime -end .loader_linux $?
 
 # Build Windows version
