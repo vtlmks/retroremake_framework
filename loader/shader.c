@@ -1,4 +1,3 @@
-
 #include "shader.h"
 
 //==============================================================
@@ -16,7 +15,7 @@ static void CrtsTone(		// Output 4 float array.
 									//  2.0 = very strong contrast (over 2.0 for even more)
 	float contrast,			// Increase saturation, ranges from,
 									//  0.0 = no change
-									//  1.0 = increased contrast (over 1.0 for even more)
+									//  1.0 = increased saturation (over 1.0 for even more)
 	float saturation,			// Inputs shared between CrtsTone() and CrtsFilter()
 	float thin, float mask){
 //--------------------------------------------------------------

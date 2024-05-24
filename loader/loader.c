@@ -159,6 +159,26 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 				}
 			} break;
 
+			case GLFW_KEY_ENTER: {
+				if(!mods) {
+				} else if(mods & GLFW_MOD_CONTROL) {
+					// Handle CTRL+F12
+				} else if(mods & GLFW_MOD_SHIFT) {
+					// Handle SHIFT+F12
+				} else if(mods & GLFW_MOD_ALT) {
+					if(glfwGetWindowMonitor(window) == 0) {
+						glfwGetWindowPos(window, &window_pos[0], &window_pos[1]);
+						glfwGetWindowSize(window, &window_size[0], &window_size[1]);
+
+						GLFWmonitor *primary = glfwGetPrimaryMonitor();
+						const GLFWvidmode *mode = glfwGetVideoMode(primary);
+						glfwSetWindowMonitor(window, primary, 0, 0, mode->width, mode->height, mode->refreshRate);
+					} else {
+						glfwSetWindowMonitor(window, 0, window_pos[0], window_pos[1], window_size[0], window_size[1], 0);
+					}
+				}
+			}
+
 			default: {
 			} break;
 		}

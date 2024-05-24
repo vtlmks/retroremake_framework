@@ -24,7 +24,7 @@
 //  -2.5 = default
 //  -2.0 = smooth
 //  -1.0 = too blurry
-#define INPUT_BLUR -2.5
+#define INPUT_BLUR -2.0
 //--------------------------------------------------------------
 // Shadow mask effect, ranges from,
 //  0.25 = large amount of mask (not recommended, too dark)
