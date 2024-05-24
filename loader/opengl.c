@@ -36,6 +36,7 @@ typedef void type_glDeleteVertexArrays(GLsizei n, const GLuint *arrays);
 typedef void type_glDeleteBuffers(GLsizei n, const GLuint *buffers);
 typedef void type_glDeleteTextures(GLsizei n, const GLuint *textures);
 typedef void type_glEnable(GLenum cap);
+typedef void type_glGenerateMipmap(GLenum target);
 
 #define OpenGLFunction(Name) type_##Name *Name
 
@@ -77,6 +78,7 @@ struct opengl {
 	OpenGLFunction(glDeleteBuffers);
 	OpenGLFunction(glDeleteTextures);
 	OpenGLFunction(glEnable);
+	OpenGLFunction(glGenerateMipmap);
 };
 struct opengl opengl;
 
@@ -134,6 +136,7 @@ static void gl_init(struct opengl *opengl) {
 	GetOpenGLFunction(glDeleteBuffers);
 	GetOpenGLFunction(glDeleteTextures);
 	GetOpenGLFunction(glEnable);
+	GetOpenGLFunction(glGenerateMipmap);
 };
 
 #define glActiveTexture					opengl.glActiveTexture
@@ -173,3 +176,4 @@ static void gl_init(struct opengl *opengl) {
 #define glDeleteBuffers					opengl.glDeleteBuffers
 #define glDeleteTextures				opengl.glDeleteTextures
 #define glEnable							opengl.glEnable
+#define glGenerateMipmap				opengl.glGenerateMipmap

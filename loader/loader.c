@@ -130,6 +130,18 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 				if(!mods) {
 					// Handle F11 without any modifiers
 					state->toggle_crt_emulation = !state->toggle_crt_emulation;
+
+					glBindTexture(GL_TEXTURE_2D, state->texture);
+					if(state->toggle_crt_emulation) {
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					} else {
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+					}
+
+					glBindTexture(GL_TEXTURE_2D, 0);
+
 				} else if(mods & GLFW_MOD_CONTROL) {
 					// Handle CTRL+F11
 				} else if(mods & GLFW_MOD_SHIFT) {
@@ -161,7 +173,6 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 					// Handle ALT+F12
 				}
 			} break;
-
 
 			// Handle fullscreen toggle
 			case GLFW_KEY_ENTER: {
@@ -303,9 +314,14 @@ void setup_texture(struct loader_state *state, int width, int height) {
 	glBindTexture(GL_TEXTURE_2D, state->texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state->shared.buffer);
+	if(state->toggle_crt_emulation) {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	} else {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	}
 }
 
 void change_resolution(struct loader_state *state, int width, int height) {
@@ -440,7 +456,7 @@ int main(int argc, char **argv) {
 
 			bool running = true;
 
-			float contrast = 1.0f;
+			float contrast = 1.2f;
 			float saturation = 0.0f;
 			float brightness = 1.2f;
 
