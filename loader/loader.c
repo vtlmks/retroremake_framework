@@ -491,6 +491,7 @@ int main(int argc, char **argv) {
 				switch(state.mode) {
 					case LOAD_SELECTOR_STATE: {
 						snprintf(window_title, sizeof(window_title), "%s - %s", state.selector->window_title, "Middle Mouse to release mouse - ESC to Exit");
+						glfwSetWindowTitle(window, window_title);
 						change_resolution(&state, state.selector->buffer_width, state.selector->buffer_height);
 						state.frames_per_second = state.selector->frames_per_second;
 						state.frame_time = 1.0 / state.frames_per_second;

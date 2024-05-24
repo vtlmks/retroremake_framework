@@ -142,12 +142,7 @@ void main() {
 		);
 
 		outcolor.rgb *= brightness;
-
-	// if (outcolor.r > 1.0 || outcolor.g > 1.0 || outcolor.b > 1.0) {
-	// 	outcolor = vec4(0.0, 1.0, 0.0, 1.0); // Set to bright green
-	// } else {
 		outcolor = vec4(outcolor.rgb, 1.0); // Keep original color with alpha set to 1.0
-	// }
 
 	} else {
 		outcolor = texture(iChannel0, fragCoord);
