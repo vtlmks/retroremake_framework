@@ -277,7 +277,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	// } else if(button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE) {
 	// 	state->shared.mouse_button_state[button] = 0;
 	}
-
 }
 
 /* [=]===^=====================================================================================^===[=] */
@@ -314,7 +313,9 @@ void setup_texture(struct loader_state *state, int width, int height) {
 	glBindTexture(GL_TEXTURE_2D, state->texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state->shared.buffer);
+	// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state->shared.buffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state->shared.buffer);
+
 	if(state->toggle_crt_emulation) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -329,7 +330,6 @@ void change_resolution(struct loader_state *state, int width, int height) {
 		setup_texture(state, width, height);
 	}
 }
-
 
 #include "library_loader.c"
 
@@ -402,6 +402,8 @@ int main(int argc, char **argv) {
 			state.viewport.h = scaled_window_height;
 			state.mode = LOAD_SELECTOR_STATE;
 
+			glEnable(GL_FRAMEBUFFER_SRGB);
+
 			// Setup Shader
 			GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 			glShaderSource(vertex_shader, 1, &vertex_shader_start, 0);
@@ -456,9 +458,9 @@ int main(int argc, char **argv) {
 
 			bool running = true;
 
-			float contrast = 1.2f;
+			float contrast = 1.0f;
 			float saturation = 0.0f;
-			float brightness = 1.2f;
+			float brightness = 1.0f;
 
 			/*
 			 * Move this into the mainloop if change of contrast/saturation is added as an interactive thing.

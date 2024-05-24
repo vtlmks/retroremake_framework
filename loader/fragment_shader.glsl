@@ -12,7 +12,7 @@ uniform bool crt_emulation;
 uniform sampler2D iChannel0;
 
 mediump vec3 CrtsFetch(mediump vec2 uv) {
-	const float bias = 0.0333333;
+	const float bias = 0.003333333;
 	return max(texture(iChannel0, uv).rgb, vec3(bias));
 }
 
@@ -119,6 +119,10 @@ mediump vec3 CrtsFilter(mediump vec2 ipos, mediump vec2 inputSizeDivOutputSize, 
 	#endif
 }
 
+mediump vec3 linearToSRGB(mediump vec3 color) {
+	return pow(color, vec3(1.0 / 2.2));
+}
+
 void main() {
 	mediump vec2 fragCoord = vec2(frag_texture_coord.x, 1.0 - frag_texture_coord.y);
 	if (crt_emulation) {
@@ -138,7 +142,13 @@ void main() {
 		);
 
 		outcolor.rgb *= brightness;
-		outcolor = vec4(outcolor.rgb, 1.0);
+
+	// if (outcolor.r > 1.0 || outcolor.g > 1.0 || outcolor.b > 1.0) {
+	// 	outcolor = vec4(0.0, 1.0, 0.0, 1.0); // Set to bright green
+	// } else {
+		outcolor = vec4(outcolor.rgb, 1.0); // Keep original color with alpha set to 1.0
+	// }
+
 	} else {
 		outcolor = texture(iChannel0, fragCoord);
 	}

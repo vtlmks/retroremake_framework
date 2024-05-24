@@ -12,7 +12,7 @@
 // #define CRTS_MASK_GRILLE_LITE 1
 // #define CRTS_MASK_NONE 1
 // #define CRTS_MASK_SHADOW 1
-//--------------------------------------------------------------
+// --------------------------------------------------------------
 // Scanline thinness
 //  0.50 = fused scanlines
 //  0.70 = recommended default
@@ -24,7 +24,7 @@
 //  -2.5 = default
 //  -2.0 = smooth
 //  -1.0 = too blurry
-#define INPUT_BLUR -2.0
+#define INPUT_BLUR -2.5
 //--------------------------------------------------------------
 // Shadow mask effect, ranges from,
 //  0.25 = large amount of mask (not recommended, too dark)
