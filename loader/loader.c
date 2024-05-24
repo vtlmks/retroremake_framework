@@ -124,6 +124,8 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 
 	if(action == GLFW_RELEASE) {
 		switch(key) {
+
+			// Handle shader CRT emulation toggle
 			case GLFW_KEY_F11: {
 				if(!mods) {
 					// Handle F11 without any modifiers
@@ -137,6 +139,7 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 				}
 			} break;
 
+			// Handle fullscreen toggle
 			case GLFW_KEY_F12: {
 				if(!mods) {
 					// Handle F12 without any modifiers
@@ -159,12 +162,14 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 				}
 			} break;
 
+
+			// Handle fullscreen toggle
 			case GLFW_KEY_ENTER: {
 				if(!mods) {
 				} else if(mods & GLFW_MOD_CONTROL) {
-					// Handle CTRL+F12
+					// Handle CTRL+ENTER
 				} else if(mods & GLFW_MOD_SHIFT) {
-					// Handle SHIFT+F12
+					// Handle SHIFT+ENTER
 				} else if(mods & GLFW_MOD_ALT) {
 					if(glfwGetWindowMonitor(window) == 0) {
 						glfwGetWindowPos(window, &window_pos[0], &window_pos[1]);
