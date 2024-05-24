@@ -268,8 +268,8 @@ void main() {
 			1.0 / resolution,
 			2.0 / resolution,
 			src_image_size.y,
-			vec2(1.0 / 32.0, 1.0 / 24.0), // this is 'warp' values   1/x*(4/3), 1/x
-			// vec2(1.0 / 64.0, 1.0 / 48.0),
+			// vec2(1.0 / 32.0, 1.0 / 24.0), // this is 'warp' values   1/x*(4/3), 1/x
+			vec2(1.0 / 24.0, 1.0 / 16.0),
 			INPUT_THIN,
 			INPUT_BLUR,
 			INPUT_MASK,
