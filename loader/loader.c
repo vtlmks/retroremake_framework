@@ -1,6 +1,6 @@
 /* ===^=====================================================================================^===[=]
  *
- *  Author: Peter Fors  aka  ViTAL
+ *  Author: Peter Fors  aka  ViTAL/MKS
  *
  *  (C) Copyright 2023 by Mindkiller Systems, inc.
  *      All rights reserved.
@@ -24,7 +24,6 @@
  * “The ships hung in the sky in much the same way that bricks don't.” ― Douglas Adams
  *
  */
-
 
 //         -  - -- --- ---- -----=<{[ includes ]}>=----- ---- --- -- -  -
 
@@ -91,61 +90,89 @@
 
 /* [=]===^=====================================================================================^===[=] */
 // NOTE(peter): We can steal F11 and F12 here, and the shift, ctrl, alt, version of them, they are not on the Amiga keyboard.
-	static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 	static int window_pos[2];
 	static int window_size[2];
 
 	struct loader_state *state = glfwGetWindowUserPointer(window);
 
-	// NOTE(peter): Toggle CRT emulation
-	if(key == GLFW_KEY_F11 && action == GLFW_PRESS) {
-		state->toggle_crt_emulation = !state->toggle_crt_emulation;
+	if(action == GLFW_PRESS || action == GLFW_RELEASE) {
+		// Update the keyboard_state
+		state->shared.keyboard_state[key] = (action == GLFW_PRESS) ? 1 : 0;
 	}
 
-	// NOTE(peter): Toggle fullscreen
-	if(glfwGetKey(window, GLFW_KEY_F12) == GLFW_PRESS) {
-		if(glfwGetWindowMonitor(window) == 0) {
-
-			glfwGetWindowPos(window, &window_pos[0], &window_pos[1]);
-			glfwGetWindowSize(window, &window_size[0], &window_size[1]);
-
-			GLFWmonitor *primary = glfwGetPrimaryMonitor();
-			const GLFWvidmode *mode = glfwGetVideoMode(primary);
-			glfwSetWindowMonitor(window, primary, 0, 0, mode->width, mode->height, mode->refreshRate);
-
-		} else {
-			glfwSetWindowMonitor(window, 0, window_pos[0], window_pos[1], window_size[0], window_size[1], 0);
-		}
-	}
-
-	// NOTE(peter): Update the keyboard_state
-	if(action == GLFW_PRESS) {
-		state->shared.keyboard_state[key] = 1;
-	} else if(action == GLFW_RELEASE) {
-		state->shared.keyboard_state[key] = 0;
-	}
-
-	// NOTE(peter): Test code to go back to the selector.
 	if(action == GLFW_RELEASE) {
-		if(key == GLFW_KEY_F1) {
-			if(state->mode == REMAKE_STATE) {
-				state->mode = UNLOAD_REMAKE_STATE;
-			}
+		switch(key) {
+			case GLFW_KEY_F11: {
+				if(!mods) {
+					// Handle F11 without any modifiers
+					state->toggle_crt_emulation = !state->toggle_crt_emulation;
+				} else if(mods & GLFW_MOD_CONTROL) {
+					// Handle CTRL+F11
+				} else if(mods & GLFW_MOD_SHIFT) {
+					// Handle SHIFT+F11
+				} else if(mods & GLFW_MOD_ALT) {
+					// Handle ALT+F11
+				}
+			} break;
+
+			case GLFW_KEY_F12: {
+				if(!mods) {
+					// Handle F12 without any modifiers
+					if(glfwGetWindowMonitor(window) == 0) {
+						glfwGetWindowPos(window, &window_pos[0], &window_pos[1]);
+						glfwGetWindowSize(window, &window_size[0], &window_size[1]);
+
+						GLFWmonitor *primary = glfwGetPrimaryMonitor();
+						const GLFWvidmode *mode = glfwGetVideoMode(primary);
+						glfwSetWindowMonitor(window, primary, 0, 0, mode->width, mode->height, mode->refreshRate);
+					} else {
+						glfwSetWindowMonitor(window, 0, window_pos[0], window_pos[1], window_size[0], window_size[1], 0);
+					}
+				} else if(mods & GLFW_MOD_CONTROL) {
+					// Handle CTRL+F12
+				} else if(mods & GLFW_MOD_SHIFT) {
+					// Handle SHIFT+F12
+				} else if(mods & GLFW_MOD_ALT) {
+					// Handle ALT+F12
+				}
+			} break;
+
+			// Debugging case for F1
+			case GLFW_KEY_F1: {
+				if(!mods) {
+					if(state->mode == REMAKE_STATE) {
+						state->mode = UNLOAD_REMAKE_STATE;
+					}
+				} else if(mods & GLFW_MOD_CONTROL) {
+					// Handle CTRL+F1
+				} else if(mods & GLFW_MOD_SHIFT) {
+					// Handle SHIFT+F1
+				} else if(mods & GLFW_MOD_ALT) {
+					// Handle ALT+F1
+				}
+			} break;
+
+			// Add more cases as needed
+			default: {
+			} break;
 		}
 	}
 
-	// NOTE(peter): Call the key_callback of the selector or remake if it is defined.
+	// Call the key_callback of the selector or remake if it is defined.
 	switch(state->mode) {
 		case SELECTOR_STATE: {
 			if(state->selector->key_callback) {
 				state->selector->key_callback(state->shared.selector_state, key);
 			}
 		} break;
+
 		case REMAKE_STATE: {
 			if(state->remake->key_callback) {
 				state->remake->key_callback(state->shared.remake_state, key);
 			}
 		} break;
+
 		default: {
 		} break;
 	}
