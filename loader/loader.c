@@ -93,12 +93,33 @@
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 	static int window_pos[2];
 	static int window_size[2];
+	static uint32_t state_changed = 0;
 
 	struct loader_state *state = glfwGetWindowUserPointer(window);
 
 	if(action == GLFW_PRESS || action == GLFW_RELEASE) {
 		// Update the keyboard_state
 		state->shared.keyboard_state[key] = (action == GLFW_PRESS) ? 1 : 0;
+	}
+
+	if(key == GLFW_KEY_ESCAPE) {
+		if(action == GLFW_PRESS) {
+			if(!state_changed) { // Only allow state change if no recent change
+				switch(state->mode) {
+					case SELECTOR_STATE: {
+						glfwSetWindowShouldClose(window, true);
+					} break;
+					case REMAKE_STATE: {
+						state_changed = true;
+						state->mode = UNLOAD_REMAKE_STATE;
+					} break;
+					default: {
+					} break;
+				}
+			}
+		} else if(action == GLFW_RELEASE) {
+			state_changed = 0; // Clear the flag on key release
+		}
 	}
 
 	if(action == GLFW_RELEASE) {
@@ -138,22 +159,6 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 				}
 			} break;
 
-			// Debugging case for F1
-			case GLFW_KEY_F1: {
-				if(!mods) {
-					if(state->mode == REMAKE_STATE) {
-						state->mode = UNLOAD_REMAKE_STATE;
-					}
-				} else if(mods & GLFW_MOD_CONTROL) {
-					// Handle CTRL+F1
-				} else if(mods & GLFW_MOD_SHIFT) {
-					// Handle SHIFT+F1
-				} else if(mods & GLFW_MOD_ALT) {
-					// Handle ALT+F1
-				}
-			} break;
-
-			// Add more cases as needed
 			default: {
 			} break;
 		}
@@ -425,11 +430,6 @@ int main(int argc, char **argv) {
 			uint32_t remake_index = 0;
 			while(running && !glfwWindowShouldClose(window)) {
 				glfwPollEvents();
-
-				// NOTE(peter): this may be temporary, check if we are to exit.
-				if((glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)) {
-					glfwSetWindowShouldClose(window, true);
-				}
 
 				// NOTE(peter): Handle grabbing cursor
 				if(state.shared.grab_cursor != state.cursor_locked) {
