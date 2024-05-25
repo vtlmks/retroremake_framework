@@ -24,10 +24,9 @@ if [ ! -d "$SELECTORS_DIR" ]; then
 fi
 
 # Copy the template directory to the selectors directory
-cp -r "$TEMPLATE_DIR" "$SELECTORS_DIR/$SELECTOR_NAME"
+cp -r "$TEMPLATE_DIR" "$SELECTORS_DIR/selector_$SELECTOR_NAME"
 
 # Replace "<name>" with the provided selector name in build.sh
-sed -i "s/OUT_FILE=\"template\"/OUT_FILE=\"$SELECTOR_NAME\"/" "$SELECTORS_DIR/$SELECTOR_NAME/build.sh"
+sed -i "s/OUT_FILE=\"template\"/OUT_FILE=\"$SELECTOR_NAME\"/" "$SELECTORS_DIR/selector_$SELECTOR_NAME/build.sh"
 
 echo "Selector setup complete: $SELECTOR_NAME"
-

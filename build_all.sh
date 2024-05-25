@@ -15,23 +15,23 @@ build_shared_libraries() {
 }
 
 # Build remakes
-echo ""
+echo
 echo "~~~ Building remakes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo ""
+echo
 build_shared_libraries "remakes"
 
 # Build selectors
-echo ""
+echo
 echo "~~~ Building selectors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo ""
+echo
 build_shared_libraries "selectors"
 
 # Build loader
-echo ""
+echo
 echo "~~~ Building loader ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo ""
+echo
 (cd "loader" && ./build.sh)
 
-echo ""
+echo
 echo "Build process completed."
 

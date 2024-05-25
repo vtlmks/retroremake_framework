@@ -543,7 +543,6 @@ int main(int argc, char **argv) {
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, state.texture);
 				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, state.shared.buffer_width, state.shared.buffer_height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, state.shared.buffer);
-
 				glUseProgram(shader_program);
 				glUniform2f(uniform_src_image_size, (float)state.shared.buffer_width, (float)state.shared.buffer_height);
 				glUniform2f(uniform_resolution, state.viewport.w, state.viewport.h);
