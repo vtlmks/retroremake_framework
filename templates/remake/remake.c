@@ -7,38 +7,44 @@
 #include <loader.h>
 #include <remake.h>
 
-#include "../pcg.c"
+/*
+ * utils.h will be loaded from the framework-root/include directory, it has useful functions
+ */
+#define UTILS_IMPLEMENTATION
+#include <utils.h>
 
-
-struct remake  {
+struct remake_state {
+	struct loader_shared_state *shared;
+	struct rng_state rand_state;
 };
 
 void setup(struct loader_shared_state *state) {
-	state->remake_userdata = (struct remake *)calloc(1, sizeof(struct remake));
+	state->remake_state = (struct remake_state *)calloc(1, sizeof(struct remake_state));
+	struct remake_state *remake = (struct remake_state *)state->remake_state;
+	remake->shared = state;
+
+	xor_init_rng(&remake->rand_state, 0x55780375);
 }
 
 void cleanup(struct loader_shared_state *state) {
-	struct remake *remake = (struct remake *)state->remake_userdata;
-
-	free(state->remake_userdata);
-	state->remake_userdata = 0;
+	struct remake_state *remake = (struct remake_state *)state->remake_state;
+	// NOTE(peter): clean up allocations here et.c
+	free(state->remake_state);
+	state->remake_state = 0;
 }
 
-void key_callback(struct loader_shared_state *state, int key) {
-	struct remake *remake = (struct remake *)state->remake_userdata;
+void key_callback(struct remake_state *state, int key) {
 }
 
-void audio_callback(struct loader_shared_state *state, int16_t *audio_buffer, size_t frames) {
-	struct remake *remake = (struct remake *)state->remake_userdata;
+void audio_callback(struct remake_state *state, int16_t *audio_buffer, size_t frames) {
 	memset(audio_buffer, 0, frames*2*sizeof(int16_t));
 }
 
-int32_t mainloop_callback(struct loader_shared_state *state) {
-	struct remake *remake = (struct remake *)state->remake_userdata;
+uint32_t mainloop_callback(struct remake_state *state) {
 
-	uint32_t *buffer = state->buffer;
-	for(uint32_t i = 0; i < BUFFER_WIDTH * BUFFER_HEIGHT; ++i) {
-		buffer[i] = pcg32_random();
+	uint32_t *buffer = state->shared->buffer;
+	for(uint32_t i = 0; i < state->shared->buffer_width * state->shared->buffer_height; ++i) {
+		buffer[i] = xor_generate_random(&state->rand_state);
 	}
 
 	return 0;
