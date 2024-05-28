@@ -302,8 +302,12 @@ static void render_debug_bar(struct loader_state *state, struct debugger_timing 
 
 /* [=]===^=====================================================================================^===[=] */
 void setup_texture(struct loader_state *state, int width, int height) {
-	if(state->texture) glDeleteTextures(1, &state->texture);
-	if(state->shared.buffer) aligned_free(state->shared.buffer);
+	if(state->texture) {
+		glDeleteTextures(1, &state->texture);
+	}
+	if(state->shared.buffer) {
+		aligned_free(state->shared.buffer);
+	}
 
 	state->shared.buffer = aligned_alloc(64, width * height * sizeof(uint32_t));
 	state->shared.buffer_width = width;
