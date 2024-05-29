@@ -1,10 +1,5 @@
 #pragma once
 
-// IMPORTANT(peter): DO NOT CHANGE THESE!!!
-//                   There is nothing that checks these values, they are for optimization/convenience only
-// #define FRAMES_PER_SECOND 50.0
-// #define FRAME_TIME (1.0/FRAMES_PER_SECOND)
-
 #ifdef _WIN32
 #define EXPORT __declspec(dllexport)
 #else
@@ -26,22 +21,21 @@ struct loader_info {
 	char author_name[40];
 };
 
-
 enum cpu_features {
-	REMAKE_CPU_SSE = 0x0001,
-	REMAKE_CPU_SSE2 = 0x0002,
-	REMAKE_CPU_SSE3 = 0x0004,
-	REMAKE_CPU_SSSE3 = 0x0008,
-	REMAKE_CPU_SSE4_1 = 0x0010,
-	REMAKE_CPU_SSE4_2 = 0x0020,
-	REMAKE_CPU_AVX = 0x0040,
-	REMAKE_CPU_AVX2 = 0x0080,
-	REMAKE_CPU_FMA = 0x0100,
-	REMAKE_CPU_BMI1 = 0x0200,
-	REMAKE_CPU_BMI2 = 0x0400,
-	REMAKE_CPU_AES = 0x0800,
-	REMAKE_CPU_AVX512F = 0x1000,
-	REMAKE_CPU_SHA = 0x2000
+	REMAKE_CPU_SSE			= 1 << 0,
+	REMAKE_CPU_SSE2		= 1 << 1,
+	REMAKE_CPU_SSE3		= 1 << 2,
+	REMAKE_CPU_SSSE3		= 1 << 3,
+	REMAKE_CPU_SSE4_1		= 1 << 4,
+	REMAKE_CPU_SSE4_2		= 1 << 5,
+	REMAKE_CPU_AVX			= 1 << 6,
+	REMAKE_CPU_AVX2		= 1 << 7,
+	REMAKE_CPU_FMA			= 1 << 8,
+	REMAKE_CPU_BMI1		= 1 << 9,
+	REMAKE_CPU_BMI2		= 1 << 10,
+	REMAKE_CPU_AES			= 1 << 11,
+	REMAKE_CPU_AVX512F	= 1 << 12,
+	REMAKE_CPU_SHA			= 1 << 13,
 };
 
 struct loader_shared_state {
@@ -59,10 +53,9 @@ struct loader_shared_state {
 	bool grab_cursor;								// lock cursor to window.
 };
 
-
 #define REMAKE_MOUSE_BUTTON_LEFT		0
-#define REMAKE_MOUSE_BUTTON_RIGHT		1
-#define REMAKE_MOUSE_BUTTON_MIDDLE	2	// cant be used, as the main program use it to lock the cursor to the window when pressed, to make mousemovement work nicely inside remakes.
+#define REMAKE_MOUSE_BUTTON_RIGHT	1
+#define REMAKE_MOUSE_BUTTON_MIDDLE	2		// cant really be used, as the main program use it to lock the cursor to the window when pressed, to make mousemovement work nicely inside remakes.
 
 #define REMAKE_KEY_SPACE				32
 #define REMAKE_KEY_APOSTROPHE			39  /* ' */

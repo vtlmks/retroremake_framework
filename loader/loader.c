@@ -204,13 +204,13 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 	switch(state->mode) {
 		case SELECTOR_STATE: {
 			if(state->selector->key_callback) {
-				state->selector->key_callback(state->shared.selector_state, key);
+				state->selector->key_callback(state->shared.selector_state, key, action);
 			}
 		} break;
 
 		case REMAKE_STATE: {
 			if(state->remake->key_callback) {
-				state->remake->key_callback(state->shared.remake_state, key);
+				state->remake->key_callback(state->shared.remake_state, key, action);
 			}
 		} break;
 
@@ -272,10 +272,29 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		state->shared.mouse_button_state[button] = 0;
 	}
 
+
 	if(button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
 		state->shared.grab_cursor = !state->shared.grab_cursor;
 	// } else if(button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE) {
 	// 	state->shared.mouse_button_state[button] = 0;
+	}
+
+	// Call the key_callback of the selector or remake if it is defined.
+	switch(state->mode) {
+		case SELECTOR_STATE: {
+			if(state->selector->mouse_button_callback) {
+				state->selector->mouse_button_callback(state->shared.selector_state, button, action);
+			}
+		} break;
+
+		case REMAKE_STATE: {
+			if(state->remake->mouse_button_callback) {
+				state->remake->mouse_button_callback(state->shared.remake_state, button, action);
+			}
+		} break;
+
+		default: {
+		} break;
 	}
 }
 
@@ -523,7 +542,9 @@ int main(int argc, char **argv) {
 					} break;
 
 					case REMAKE_STATE: {
-						state.remake->mainloop_callback(state.shared.remake_state);
+						if(state.remake->mainloop_callback(state.shared.remake_state)) {
+							state.mode = UNLOAD_REMAKE_STATE;
+						}
 					} break;
 
 					case UNLOAD_REMAKE_STATE: {

@@ -21,7 +21,8 @@ struct selector_info {
 	void (*setup)(struct loader_shared_state *state, struct loader_info *remakes, uint32_t remake_count);
 	void (*cleanup)(struct loader_shared_state *state);
 	void (*audio_callback)(struct selector_state *state, int16_t *audio_buffer, size_t frames);
-	void (*key_callback)(struct selector_state *state, int key);
+	void (*key_callback)(struct selector_state *state, int key, int action);
+	void (*mouse_button_callback)(struct selector_state *state, int button, int action);
 	void (*pre_selector_run)(struct selector_state *state);
 	uint32_t (*mainloop_callback)(struct selector_state *state);
 	void (*change_resolution)(struct loader_state *state, int width, int height);
