@@ -13,7 +13,7 @@ uniform sampler2D iChannel0;
 
 mediump vec3 CrtsFetch(mediump vec2 uv) {
 	const float bias = 0.003333333;
-	return max(texture(iChannel0, uv).rgb, vec3(bias));
+	return max(texture(iChannel0, uv, -16.0).rgb, vec3(bias));
 }
 
 #define CrtsRcpF1(x) (1.0 / (x))
@@ -148,4 +148,3 @@ void main() {
 		outcolor = texture(iChannel0, fragCoord);
 	}
 }
-

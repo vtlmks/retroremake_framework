@@ -8,10 +8,10 @@
 #define CRTS_WARP 1
 //--------------------------------------------------------------
 // Try different masks
-#define CRTS_MASK_GRILLE 1
+// #define CRTS_MASK_GRILLE 1
 // #define CRTS_MASK_GRILLE_LITE 1
 // #define CRTS_MASK_NONE 1
-// #define CRTS_MASK_SHADOW 1
+#define CRTS_MASK_SHADOW 1
 // --------------------------------------------------------------
 // Scanline thinness
 //  0.50 = fused scanlines
