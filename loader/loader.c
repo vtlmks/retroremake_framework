@@ -68,7 +68,7 @@
 #include <GLFW/glfw3.h>
 
 // Default scale
-#define SCALE (3)
+#define SCALE (3.1)
 
 #include "misc.h"
 

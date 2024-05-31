@@ -1,5 +1,4 @@
 // Specify default precision for fragment shaders
-precision mediump float;
 
 out vec4 outcolor;
 in vec2 frag_texture_coord;
@@ -11,7 +10,7 @@ uniform vec4 tone_data;
 uniform bool crt_emulation;
 uniform sampler2D iChannel0;
 
-mediump vec3 CrtsFetch(mediump vec2 uv) {
+vec3 CrtsFetch(vec2 uv) {
 	const float bias = 0.003333333;
 	return max(texture(iChannel0, uv, -16.0).rgb, vec3(bias));
 }
@@ -21,14 +20,14 @@ mediump vec3 CrtsFetch(mediump vec2 uv) {
 const float PI2 = 6.28318530717958;
 const float HALF = 0.5;
 
-mediump float CrtsMax3F1(mediump float a, mediump float b, mediump float c) {
+float CrtsMax3F1(float a, float b, float c) {
 	return max(a, max(b, c));
 }
 
-mediump vec3 CrtsMask(mediump vec2 pos, mediump float dark) {
+vec3 CrtsMask(vec2 pos, float dark) {
 	#ifdef CRTS_MASK_GRILLE
-		mediump vec3 m = vec3(dark);
-		mediump float x = fract(pos.x * (1.0 / 3.0));
+		vec3 m = vec3(dark);
+		float x = fract(pos.x * (1.0 / 3.0));
 		m.r = (x < (1.0 / 3.0)) ? 1.0 : dark;
 		m.g = (x >= (1.0 / 3.0) && x < (2.0 / 3.0)) ? 1.0 : dark;
 		m.b = (x >= (2.0 / 3.0)) ? 1.0 : dark;
@@ -36,8 +35,8 @@ mediump vec3 CrtsMask(mediump vec2 pos, mediump float dark) {
 	#endif
 
 	#ifdef CRTS_MASK_GRILLE_LITE
-		mediump vec3 m = vec3(1.0);
-		mediump float x = fract(pos.x * (1.0 / 3.0));
+		vec3 m = vec3(1.0);
+		float x = fract(pos.x * (1.0 / 3.0));
 		m.r = (x < (1.0 / 3.0)) ? dark : 1.0;
 		m.g = (x >= (1.0 / 3.0) && x < (2.0 / 3.0)) ? dark : 1.0;
 		m.b = (x >= (2.0 / 3.0)) ? dark : 1.0;
@@ -50,8 +49,8 @@ mediump vec3 CrtsMask(mediump vec2 pos, mediump float dark) {
 
 	#ifdef CRTS_MASK_SHADOW
 		pos.x += pos.y * 3.0;
-		mediump vec3 m = vec3(dark);
-		mediump float x = fract(pos.x * (1.0 / 6.0));
+		vec3 m = vec3(dark);
+		float x = fract(pos.x * (1.0 / 6.0));
 		m.r = (x < (1.0 / 3.0)) ? 1.0 : dark;
 		m.g = (x >= (1.0 / 3.0) && x < (2.0 / 3.0)) ? 1.0 : dark;
 		m.b = (x >= (2.0 / 3.0)) ? 1.0 : dark;
@@ -59,18 +58,18 @@ mediump vec3 CrtsMask(mediump vec2 pos, mediump float dark) {
 	#endif
 }
 
-mediump vec3 CrtsFilter(mediump vec2 ipos, mediump vec2 inputSizeDivOutputSize, mediump vec2 halfInputSize, mediump vec2 rcpInputSize, mediump vec2 rcpOutputSize, mediump vec2 twoDivOutputSize, mediump float inputHeight, mediump vec2 warp, mediump float thin, mediump float blur, mediump float mask, mediump vec4 tone) {
-	mediump vec2 pos = ipos * twoDivOutputSize - vec2(1.0);
+vec3 CrtsFilter(vec2 ipos, vec2 inputSizeDivOutputSize, vec2 halfInputSize, vec2 rcpInputSize, vec2 rcpOutputSize, vec2 twoDivOutputSize, float inputHeight, vec2 warp, float thin, float blur, float mask, vec4 tone) {
+	vec2 pos = ipos * twoDivOutputSize - vec2(1.0);
 	pos *= vec2(1.0 + (pos.y * pos.y) * warp.x, 1.0 + (pos.x * pos.x) * warp.y);
-	mediump float vin = 1.0 - ((1.0 - CrtsSatF1(pos.x * pos.x)) * (1.0 - CrtsSatF1(pos.y * pos.y)));
+	float vin = 1.0 - ((1.0 - CrtsSatF1(pos.x * pos.x)) * (1.0 - CrtsSatF1(pos.y * pos.y)));
 	vin = CrtsSatF1((-vin) * inputHeight + inputHeight);
 	pos = pos * halfInputSize + halfInputSize;
 
-	mediump float y0 = floor(pos.y - 0.5) + 0.5;
-	mediump float x0 = floor(pos.x - 1.5) + 0.5;
-	mediump vec2 p = vec2(x0 * rcpInputSize.x, y0 * rcpInputSize.y);
+	float y0 = floor(pos.y - 0.5) + 0.5;
+	float x0 = floor(pos.x - 1.5) + 0.5;
+	vec2 p = vec2(x0 * rcpInputSize.x, y0 * rcpInputSize.y);
 
-	mediump vec3 colA[4], colB[4];
+	vec3 colA[4], colB[4];
 	for (int i = 0; i < 4; i++) {
 		colA[i] = CrtsFetch(p);
 		p.x += rcpInputSize.x;
@@ -81,17 +80,17 @@ mediump vec3 CrtsFilter(mediump vec2 ipos, mediump vec2 inputSizeDivOutputSize, 
 		colB[i] = CrtsFetch(p);
 	}
 
-	mediump float off = pos.y - y0;
-	mediump float scanA = cos(min(HALF, off * thin) * PI2) * HALF + HALF;
-	mediump float scanB = cos(min(HALF, (-off) * thin + thin) * PI2) * HALF + HALF;
+	float off = pos.y - y0;
+	float scanA = cos(min(HALF, off * thin) * PI2) * HALF + HALF;
+	float scanB = cos(min(HALF, (-off) * thin + thin) * PI2) * HALF + HALF;
 
-	mediump float off0 = pos.x - x0;
-	mediump float pix[4];
+	float off0 = pos.x - x0;
+	float pix[4];
 	for (int i = 0; i < 4; i++) {
-		mediump float diff = off0 - float(i);
+		float diff = off0 - float(i);
 		pix[i] = exp2(blur * diff * diff);
 	}
-	mediump float pixT = CrtsRcpF1(pix[0] + pix[1] + pix[2] + pix[3]);
+	float pixT = CrtsRcpF1(pix[0] + pix[1] + pix[2] + pix[3]);
 
 	#ifdef CRTS_WARP
 		pixT *= vin;
@@ -100,12 +99,12 @@ mediump vec3 CrtsFilter(mediump vec2 ipos, mediump vec2 inputSizeDivOutputSize, 
 	scanA *= pixT;
 	scanB *= pixT;
 
-	mediump vec3 color = (colA[0] * pix[0] + colA[1] * pix[1] + colA[2] * pix[2] + colA[3] * pix[3]) * scanA + (colB[0] * pix[0] + colB[1] * pix[1] + colB[2] * pix[2] + colB[3] * pix[3]) * scanB;
+	vec3 color = (colA[0] * pix[0] + colA[1] * pix[1] + colA[2] * pix[2] + colA[3] * pix[3]) * scanA + (colB[0] * pix[0] + colB[1] * pix[1] + colB[2] * pix[2] + colB[3] * pix[3]) * scanB;
 	color *= CrtsMask(ipos, mask);
 
 	#ifdef CRTS_TONE
-		mediump float peak = max(1.0 / (256.0 * 65536.0), CrtsMax3F1(color.r, color.g, color.b));
-		mediump vec3 ratio = color * CrtsRcpF1(peak);
+		float peak = max(1.0 / (256.0 * 65536.0), CrtsMax3F1(color.r, color.g, color.b));
+		vec3 ratio = color * CrtsRcpF1(peak);
 		#ifdef CRTS_CONTRAST
 			peak = pow(peak, tone.x);
 		#endif
@@ -119,12 +118,12 @@ mediump vec3 CrtsFilter(mediump vec2 ipos, mediump vec2 inputSizeDivOutputSize, 
 	#endif
 }
 
-mediump vec3 linearToSRGB(mediump vec3 color) {
+vec3 linearToSRGB(vec3 color) {
 	return pow(color, vec3(1.0 / 2.2));
 }
 
 void main() {
-	mediump vec2 fragCoord = vec2(frag_texture_coord.x, 1.0 - frag_texture_coord.y);
+	vec2 fragCoord = vec2(frag_texture_coord.x, 1.0 - frag_texture_coord.y);
 	if (crt_emulation) {
 		outcolor.rgb = CrtsFilter(
 			fragCoord.xy * resolution,
