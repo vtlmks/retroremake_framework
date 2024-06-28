@@ -6,6 +6,8 @@
 #include <unistd.h> // For read and close
 #ifdef _WIN32
 #include <windows.h> // For Windows-specific functions
+#else
+#include <sys/random.h>
 #endif
 
 struct rng_state { uint32_t x, y, z, w; };
@@ -57,16 +59,27 @@ uint32_t mks_rand(uint32_t max) {
 		exit(EXIT_FAILURE);
 	}
 #else
-	int fd = open("/dev/urandom", O_RDONLY);
-	if(fd == -1) {
-		perror("Error opening /dev/urandom");
-		exit(EXIT_FAILURE);
-	}
-	if(read(fd, &r, sizeof(r)) != sizeof(r)) {
-		perror("Error reading from /dev/urandom");
-		exit(EXIT_FAILURE);
-	}
-	close(fd);
+	// int fd = open("/dev/urandom", O_RDONLY);
+	// if(fd == -1) {
+	// 	perror("Error opening /dev/urandom");
+	// 	exit(EXIT_FAILURE);
+	// }
+	// if(read(fd, &r, sizeof(r)) != sizeof(r)) {
+	// 	perror("Error reading from /dev/urandom");
+	// 	exit(EXIT_FAILURE);
+	// }
+	// close(fd);
+    // Use getrandom() for better entropy on Linux
+    if (getrandom(&r, sizeof(r), 0) != sizeof(r)) {
+        perror("Error getting random data");
+        exit(EXIT_FAILURE);
+    }
+
+    // Eliminate modulo bias
+    uint64_t rand_max = (1ULL << 32) - 1;  // Maximum 32-bit value
+    uint64_t unbiased_r = ((uint64_t)r * (uint64_t)max) / rand_max;
+    return (uint32_t)unbiased_r;
+
 #endif
 	return r % max;
 }

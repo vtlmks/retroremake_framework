@@ -578,6 +578,7 @@ int main(int argc, char **argv) {
 					}
 					while((next_update - glfwGetTime()) > 0.0) { }			// wait <1ms
 				} else { next_update = glfwGetTime(); }						// We are in the future, next_updates is set to now to not fastforward
+
 				next_update += state.frame_time;
 
 				state.shared.frame_number++;

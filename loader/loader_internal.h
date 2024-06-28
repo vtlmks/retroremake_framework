@@ -6,11 +6,10 @@
 	static void mks_sleep(double time) { Sleep((DWORD)(time*1000)); }
 
 #elif __linux__
-	#include <sys/prctl.h>
-	#include <sys/resource.h>
-	#include <unistd.h>
+	#include <time.h>
 	static void mks_sleep(double time) { usleep((int)(time*1000000)); }
 #endif
+
 
 // static const float vertices[] = {
 // 	 1.f,-1.f, 0.0f, 1.f, 0.f,
